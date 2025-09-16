@@ -1,0 +1,28 @@
+{
+  "name": "somniagames-cli",
+  "version": "0.1.0",
+  "description": "CLI tool for SomniaGames platform",
+  "main": "dist/index.js",
+  "bin": {
+    "somniagames": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "ts-node src/index.ts"
+  },
+  "keywords": ["somnia", "games", "cli", "blockchain"],
+  "author": "SomniaGames Team",
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^9.0.0",
+    "shelljs": "^0.8.5",
+    "fs-extra": "^10.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^18.0.0",
+    "@types/shelljs": "^0.8.11",
+    "@types/fs-extra": "^9.0.13",
+    "ts-node": "^10.9.0",
+    "typescript": "^4.9.0"
+  }
+}

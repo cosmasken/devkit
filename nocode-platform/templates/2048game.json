@@ -1,0 +1,50 @@
+{
+  "id": "2048game",
+  "name": "Crypto 2048",
+  "description": "A blockchain version of the popular 2048 puzzle game. Combine tiles to reach the highest number!",
+  "category": "Puzzle",
+  "difficulty": "Beginner",
+  "players": 1,
+  "previewImage": "/images/2048-preview.png",
+  "features": [
+    "Single player mode",
+    "On-chain high scores",
+    "Progressive difficulty",
+    "Tile merging mechanics",
+    "Undo functionality"
+  ],
+  "defaultSettings": {
+    "boardSize": 4,
+    "winTarget": 2048,
+    "startingTiles": 2,
+    "maxUndos": 3
+  },
+  "assets": [
+    {
+      "name": "2 Tile",
+      "type": "NFT",
+      "rarity": 1
+    },
+    {
+      "name": "4 Tile",
+      "type": "NFT",
+      "rarity": 1
+    },
+    {
+      "name": "2048 Tile",
+      "type": "NFT",
+      "rarity": 3
+    },
+    {
+      "name": "High Score Badge",
+      "type": "NFT",
+      "rarity": 4
+    }
+  ],
+  "economy": {
+    "entryFee": 0,
+    "rewardPool": 200,
+    "tokenName": "SLIDE",
+    "tokenSymbol": "SLD"
+  }
+}

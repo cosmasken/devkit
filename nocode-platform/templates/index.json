@@ -1,0 +1,20 @@
+[
+  {
+    "id": "tictactoe",
+    "name": "Tic Tac Toe",
+    "description": "A classic Tic Tac Toe game on the blockchain. Simple, fun, and fully decentralized!",
+    "category": "Puzzle",
+    "difficulty": "Beginner",
+    "players": 2,
+    "previewImage": "/images/tictactoe-preview.png"
+  },
+  {
+    "id": "2048game",
+    "name": "Crypto 2048",
+    "description": "A blockchain version of the popular 2048 puzzle game. Combine tiles to reach the highest number!",
+    "category": "Puzzle",
+    "difficulty": "Beginner",
+    "players": 1,
+    "previewImage": "/images/2048-preview.png"
+  }
+]

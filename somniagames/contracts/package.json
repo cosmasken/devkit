@@ -1,0 +1,41 @@
+{
+  "name": "@somniagames/contracts",
+  "version": "0.1.0",
+  "description": "Smart contracts for SomniaGames - Build high-performance blockchain games on Somnia Network",
+  "main": "index.js",
+  "files": [
+    "contracts/**/*"
+  ],
+  "scripts": {
+    "test": "hardhat test",
+    "deploy": "hardhat run scripts/deploy.js"
+  },
+  "keywords": [
+    "somnia",
+    "blockchain",
+    "games",
+    "smart-contracts",
+    "solidity"
+  ],
+  "author": "SomniaGames Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/somniagames.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-username/somniagames/issues"
+  },
+  "homepage": "https://github.com/your-username/somniagames#readme",
+  "devDependencies": {
+    "@nomiclabs/hardhat-ethers": "^2.0.0",
+    "@nomiclabs/hardhat-waffle": "^2.0.0",
+    "chai": "^4.3.4",
+    "ethereum-waffle": "^3.4.0",
+    "ethers": "^5.7.0",
+    "hardhat": "^2.17.0"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.9.0"
+  }
+}

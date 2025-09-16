@@ -1,0 +1,45 @@
+{
+  "id": "tictactoe",
+  "name": "Tic Tac Toe",
+  "description": "A classic Tic Tac Toe game on the blockchain. Simple, fun, and fully decentralized!",
+  "category": "Puzzle",
+  "difficulty": "Beginner",
+  "players": 2,
+  "previewImage": "/images/tictactoe-preview.png",
+  "features": [
+    "2-player multiplayer",
+    "On-chain game state",
+    "Turn-based gameplay",
+    "Win detection",
+    "Draw detection"
+  ],
+  "defaultSettings": {
+    "boardSize": 3,
+    "winCondition": 3,
+    "timeLimit": 0,
+    "tokenReward": 10
+  },
+  "assets": [
+    {
+      "name": "X Token",
+      "type": "NFT",
+      "rarity": 1
+    },
+    {
+      "name": "O Token",
+      "type": "NFT",
+      "rarity": 1
+    },
+    {
+      "name": "Win Badge",
+      "type": "NFT",
+      "rarity": 2
+    }
+  ],
+  "economy": {
+    "entryFee": 0,
+    "rewardPool": 100,
+    "tokenName": "TICTOK",
+    "tokenSymbol": "TOK"
+  }
+}
