@@ -6,6 +6,13 @@ export { GameLeaderboard } from './GameLeaderboard';
 export { GameShop } from './GameShop';
 export { WalletConnector } from './WalletConnector';
 
+// Modular system exports
+export { SimpleGame, SimpleGameConfig } from './SimpleGame';
+export { createSimpleGame, createTetrisGame, createChessGame } from './simple';
+export { Module, DeploymentResult } from './modules/Module';
+export { NFTModule, NFTAssetConfig } from './modules/NFTModule';
+export { PaymentModule, PaymentConfig } from './modules/PaymentModule';
+
 export interface GameConfig {
   rpcUrl: string;
   chainId: number;
