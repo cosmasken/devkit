@@ -46,3 +46,7 @@
 # Temporary files
 **/tmp/
 **/temp/
+
+# Development markdown files (exclude all except README.md)
+*.md
+!README.md
