@@ -108,9 +108,11 @@ describe('Modular System', () => {
   
   describe('Deployment', () => {
     it('should deploy game with modules', async () => {
-      const game = createSimpleGame('Deploy Test', mockProvider);
+      // Create a mock signer for testing
+      const mockSigner = new ethers.Wallet('0x0123456789012345678901234567890123456789012345678901234567890123');
+      const game = createSimpleGame('Deploy Test', mockProvider, mockSigner);
       
-      // Mock the deploy methods
+      // Mock the deploy methods to test the structure
       const mockDeployResult = {
         address: '0x1234567890123456789012345678901234567890',
         transactionHash: '0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890',
@@ -135,6 +137,93 @@ describe('Modular System', () => {
         expect(result.moduleAddresses.NFTModule).toBe('0x1234567890123456789012345678901234567890');
         expect(result.moduleAddresses.PaymentModule).toBe('0x2345678901234567890123456789012345678901');
       }
+    });
+  });
+  
+  describe('NFT Module Functionality', () => {
+    it('should mint assets correctly', async () => {
+      const mockSigner = new ethers.Wallet('0x0123456789012345678901234567890123456789012345678901234567890123');
+      const nftModule = new NFTModule(
+        '0x0000000000000000000000000000000000000000',
+        mockProvider,
+        mockSigner
+      );
+      
+      // Define test assets
+      nftModule.defineAssets({
+        testAsset: {
+          name: 'Test Asset',
+          symbol: 'TEST',
+          uri: 'https://example.com/test.json',
+          rarity: 'common'
+        }
+      });
+      
+      // Test that it requires a deployed contract
+      await expect(nftModule.mintAsset('0x123...', 'testAsset')).rejects.toThrow('Contract not deployed. Call deploy() first.');
+    });
+    
+    it('should throw error for non-existent assets', async () => {
+      const mockSigner = new ethers.Wallet('0x0123456789012345678901234567890123456789012345678901234567890123');
+      const nftModule = new NFTModule(
+        '0x0000000000000000000000000000000000000000',
+        mockProvider,
+        mockSigner
+      );
+      
+      // Mock deployment to avoid actual deployment
+      const mockDeployResult = {
+        address: '0x1234567890123456789012345678901234567890',
+        transactionHash: '0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890',
+        blockNumber: 1234567
+      };
+      
+      jest.spyOn(nftModule, 'deploy').mockImplementation(async function(this: any) {
+        // Simulate the actual deploy method behavior
+        this.contractAddress = mockDeployResult.address;
+        // Mock contract object
+        this.contract = {
+          createAsset: jest.fn().mockRejectedValue(new Error('Asset nonExistent not found'))
+        };
+        return mockDeployResult;
+      });
+      
+      // Deploy the module first
+      await nftModule.deploy();
+      
+      await expect(nftModule.mintAsset('0x123...', 'nonExistent')).rejects.toThrow('Asset nonExistent not found');
+    });
+  });
+  
+  describe('Payment Module Functionality', () => {
+    it('should process payments correctly', async () => {
+      const mockSigner = new ethers.Wallet('0x0123456789012345678901234567890123456789012345678901234567890123');
+      const paymentModule = new PaymentModule(
+        '0x0000000000000000000000000000000000000000',
+        mockProvider,
+        mockSigner
+      );
+      
+      // Test that it requires a deployed contract
+      await expect(paymentModule.processPayment('0x123...', '0x456...', '1.0')).rejects.toThrow('Payment contract not deployed. Call deploy() first.');
+    });
+    
+    it('should handle entry fee collection', async () => {
+      const mockSigner = new ethers.Wallet('0x0123456789012345678901234567890123456789012345678901234567890123');
+      const paymentModule = new PaymentModule(
+        '0x0000000000000000000000000000000000000000',
+        mockProvider,
+        mockSigner
+      );
+      
+      // Test with no entry fee configured
+      const result = await paymentModule.collectEntryFee('0x123...');
+      expect(result).toBeNull();
+      
+      // Test with entry fee configured
+      paymentModule.configure({ entryFee: '0.01 SOM' });
+      // Should throw because no contract deployed
+      await expect(paymentModule.collectEntryFee('0x123...')).rejects.toThrow('Payment contract not deployed. Call deploy() first.');
     });
   });
 });

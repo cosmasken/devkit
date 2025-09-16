@@ -1,6 +1,7 @@
 // src/modules/PaymentModule.ts
 import { Module, DeploymentResult } from './Module';
 import { ethers } from 'ethers';
+import { deployContract, getContract, executeTransaction } from './DeploymentUtils';
 
 export interface PaymentConfig {
   entryFee?: string;
@@ -23,16 +24,34 @@ export class PaymentModule extends Module {
   
   async initialize(): Promise<void> {
     // Initialize with existing contract if it exists
+    if (this.contractAddress && this.contractAddress !== '0x0000000000000000000000000000000000000000' && this.signer) {
+      this.contract = getContract(
+        this.provider,
+        this.signer,
+        'PaymentSystem',
+        this.contractAddress
+      );
+    }
   }
   
   async deploy(): Promise<DeploymentResult> {
-    // In a real implementation, this would deploy the payment contract
-    // For demonstration, we'll return mock data
-    return {
-      address: '0x2345678901234567890123456789012345678901',
-      transactionHash: '0xbcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890a',
-      blockNumber: 1234568
-    };
+    if (!this.signer) {
+      throw new Error('Signer required to deploy contracts');
+    }
+    
+    // Deploy the PaymentSystem contract
+    const result = await deployContract(this.signer, 'PaymentSystem');
+    
+    // Store the contract instance
+    this.contractAddress = result.address;
+    this.contract = getContract(
+      this.provider,
+      this.signer,
+      'PaymentSystem',
+      result.address
+    );
+    
+    return result;
   }
   
   configure(config: PaymentConfig): void {
@@ -52,16 +71,33 @@ export class PaymentModule extends Module {
       throw new Error('Signer required to process payments');
     }
     
-    // In a real implementation, this would interact with the payment contract
-    // For demonstration, we'll just return mock data
-    return {
-      transactionHash: '0x' + Math.random().toString(16).substr(2, 64),
-      amount,
-      currency,
-      from,
-      to,
-      timestamp: Date.now()
-    };
+    if (!this.contract) {
+      throw new Error('Payment contract not deployed. Call deploy() first.');
+    }
+    
+    // Convert amount to proper format (assuming SOM has 18 decimals)
+    const amountBN = ethers.utils.parseEther(amount);
+    
+    try {
+      // Process the payment using the contract
+      const receipt = await executeTransaction(
+        this.contract,
+        'processPayment',
+        [from, to, amountBN]
+      );
+      
+      return {
+        transactionHash: receipt.transactionHash,
+        amount,
+        currency,
+        from,
+        to,
+        timestamp: Date.now(),
+        blockNumber: receipt.blockNumber
+      };
+    } catch (error) {
+      throw new Error(`Failed to process payment: ${error instanceof Error ? error.message : String(error)}`);
+    }
   }
   
   async collectEntryFee(player: string): Promise<any> {

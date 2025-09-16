@@ -12,6 +12,7 @@ export { createSimpleGame, createTetrisGame, createChessGame } from './simple';
 export { Module, DeploymentResult } from './modules/Module';
 export { NFTModule, NFTAssetConfig } from './modules/NFTModule';
 export { PaymentModule, PaymentConfig } from './modules/PaymentModule';
+export { deployContract, getContract, executeTransaction } from './modules/DeploymentUtils';
 
 export interface GameConfig {
   rpcUrl: string;
