@@ -1,6 +1,7 @@
 // src/GameRegistry.ts
 import { ethers } from 'ethers';
 import { GameMetadata } from './index';
+import { GameStateManager } from './websocket/GameStateManager';
 
 export interface ExtendedGameMetadata extends GameMetadata {
   metadataURI: string;
@@ -13,11 +14,13 @@ export class GameRegistry {
   private contract: ethers.Contract;
   private provider: ethers.providers.Provider;
   private signer: ethers.Signer | null = null;
+  private gameStateManager: GameStateManager | null = null;
 
   constructor(
     contractAddress: string, 
     provider: ethers.providers.Provider, 
-    signer?: ethers.Signer
+    signer?: ethers.Signer,
+    wsUrl?: string
   ) {
     // Extended ABI for GameRegistry contract
     const abi = [
@@ -63,6 +66,11 @@ export class GameRegistry {
     if (signer) {
       this.signer = signer;
       this.contract = this.contract.connect(signer);
+    }
+
+    // Initialize WebSocket connection if URL provided
+    if (wsUrl) {
+      this.gameStateManager = new GameStateManager(wsUrl);
     }
   }
 
@@ -467,5 +475,58 @@ export class GameRegistry {
     } catch (error: any) {
       throw new Error(`Failed to get active games count: ${error.message || error}`);
     }
+  }
+
+  /**
+   * Connect to WebSocket for real-time updates
+   */
+  async connectWebSocket(): Promise<void> {
+    if (!this.gameStateManager) {
+      throw new Error('WebSocket URL not provided in constructor');
+    }
+    await this.gameStateManager.connect();
+  }
+
+  /**
+   * Subscribe to real-time game updates
+   */
+  subscribeToGameUpdates(gameId: number, callback: (gameState: any) => void): void {
+    if (!this.gameStateManager) {
+      throw new Error('WebSocket not initialized');
+    }
+    
+    this.gameStateManager.subscribeToGame(gameId.toString());
+    this.gameStateManager.on('gameStateUpdate', (id: string, state: any) => {
+      if (id === gameId.toString()) {
+        callback(state);
+      }
+    });
+  }
+
+  /**
+   * Send player action via WebSocket
+   */
+  sendPlayerAction(gameId: number, action: any): void {
+    if (!this.gameStateManager) {
+      throw new Error('WebSocket not initialized');
+    }
+
+    this.gameStateManager.sendPlayerAction({
+      type: action.type,
+      playerId: this.signer?.getAddress() || '',
+      gameId: gameId.toString(),
+      data: action.data,
+      timestamp: Date.now()
+    });
+  }
+
+  /**
+   * Get current game state from WebSocket
+   */
+  getRealtimeGameState(gameId: number): any {
+    if (!this.gameStateManager) {
+      return null;
+    }
+    return this.gameStateManager.getGameState(gameId.toString());
   }
 }
