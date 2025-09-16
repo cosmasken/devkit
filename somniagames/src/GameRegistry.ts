@@ -506,14 +506,16 @@ export class GameRegistry {
   /**
    * Send player action via WebSocket
    */
-  sendPlayerAction(gameId: number, action: any): void {
+  async sendPlayerAction(gameId: number, action: any): Promise<void> {
     if (!this.gameStateManager) {
       throw new Error('WebSocket not initialized');
     }
 
+    const playerId = this.signer ? await this.signer.getAddress() : '';
+
     this.gameStateManager.sendPlayerAction({
       type: action.type,
-      playerId: this.signer?.getAddress() || '',
+      playerId,
       gameId: gameId.toString(),
       data: action.data,
       timestamp: Date.now()

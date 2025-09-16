@@ -7,8 +7,11 @@
     "contracts/**/*"
   ],
   "scripts": {
+    "compile": "hardhat compile",
     "test": "hardhat test",
-    "deploy": "hardhat run scripts/deploy.js"
+    "deploy": "hardhat run scripts/deploy.js",
+    "deploy:testnet": "hardhat run scripts/deploy.js --network somnia-testnet",
+    "deploy:mainnet": "hardhat run scripts/deploy.js --network somnia"
   },
   "keywords": [
     "somnia",

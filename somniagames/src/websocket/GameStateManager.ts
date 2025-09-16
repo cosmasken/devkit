@@ -87,8 +87,8 @@ export class GameStateManager extends EventEmitter {
     if (!this.ws) throw new Error('WebSocket not connected');
     
     this.ws.send(JSON.stringify({
-      type: 'PLAYER_ACTION',
       ...action,
+      type: 'PLAYER_ACTION',
       timestamp: Date.now()
     }));
   }
