@@ -25,7 +25,8 @@ import {
   ListItemText,
   FormControlLabel,
   Alert,
-  Snackbar
+  Snackbar,
+  AlertTitle
 } from '@mui/material';
 import {
   ArrowBack,
@@ -43,9 +44,11 @@ import {
   Check,
   SportsEsports,
   AutoFixHigh,
-  FlashOn
+  FlashOn,
+  Warning
 } from '@mui/icons-material';
 import Layout from '../components/Layout';
+import { useWallet } from '../contexts/WalletContext';
 
 const GameBuilder = () => {
   const [activeStep, setActiveStep] = useState(0);
@@ -61,9 +64,10 @@ const GameBuilder = () => {
     enableLeaderboards: true,
     enableMarketplace: true,
     enableAchievements: true,
-    useModularSystem: true // New option for modular system
+    useModularSystem: true
   });
-  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' | 'warning' | 'info' });
+  const { isConnected, account } = useWallet();
 
   const steps = [
     'Choose Template',
@@ -115,6 +119,30 @@ const GameBuilder = () => {
       isTemplate: true
     }
   ];
+
+  if (!isConnected) {
+    return (
+      <Layout>
+        <Container maxWidth="lg">
+          <Box sx={{ my: 4 }}>
+            <Alert 
+              severity="warning" 
+              icon={<Warning />}
+              sx={{ 
+                mb: 3, 
+                borderRadius: 2,
+                border: '1px solid',
+                borderColor: 'warning.light'
+              }}
+            >
+              <AlertTitle>Wallet Required</AlertTitle>
+              Please connect your wallet to access the game builder and create games.
+            </Alert>
+          </Box>
+        </Container>
+      </Layout>
+    );
+  }
 
   const handleNext = () => {
     // Validate template selection on first step
@@ -607,6 +635,15 @@ const GameBuilder = () => {
                       </ul>
                     </Alert>
                   )}
+                  
+                  <Alert 
+                    severity="info" 
+                    sx={{ mt: 2, borderRadius: 2, border: '1px solid', borderColor: 'info.light' }}
+                  >
+                    <AlertTitle>Deployment Information</AlertTitle>
+                    Your game will be deployed using your connected wallet ({account}). 
+                    You will need to confirm transactions in your wallet to complete the deployment.
+                  </Alert>
                 </CardContent>
               </Card>
             </Grid>

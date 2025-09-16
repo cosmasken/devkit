@@ -3,7 +3,6 @@ import {
   AppBar, 
   Toolbar, 
   Typography, 
-  Button, 
   Box, 
   Drawer, 
   List, 
@@ -12,45 +11,41 @@ import {
   ListItemText,
   Divider,
   IconButton,
-  Menu,
-  MenuItem
+  CssBaseline
 } from '@mui/material';
 import {
   Menu as MenuIcon,
   Gamepad,
   Dashboard,
-  AccountCircle,
-  Logout,
-  Home,
-  Build
+  Build,
+  Home
 } from '@mui/icons-material';
 import { useRouter } from 'next/router';
+import WalletConnectorComponent from './WalletConnector';
+import { WalletConnector } from '@somniagames/sdk';
 
 const drawerWidth = 240;
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  
+  const [walletConnector, setWalletConnector] = useState<WalletConnector | null>(null);
+
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
-  
-  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
+
+  const handleWalletConnected = (connector: WalletConnector) => {
+    setWalletConnector(connector);
+    // You can store the connector in a global state or context here
+    console.log('Wallet connected successfully!');
   };
-  
-  const handleMenuClose = () => {
-    setAnchorEl(null);
+
+  const handleWalletDisconnected = () => {
+    setWalletConnector(null);
+    console.log('Wallet disconnected');
   };
-  
-  const handleLogout = () => {
-    // In a real implementation, this would disconnect the wallet
-    alert('Logged out successfully!');
-    handleMenuClose();
-  };
-  
+
   const drawer = (
     <div>
       <Toolbar>
@@ -66,17 +61,23 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           </ListItemIcon>
           <ListItemText primary="Home" />
         </ListItem>
-        <ListItem button onClick={() => router.push('/dashboard')}>
+        <ListItem button onClick={() => router.push('/dashboard')} disabled={!walletConnector}>
           <ListItemIcon>
             <Dashboard />
           </ListItemIcon>
           <ListItemText primary="Dashboard" />
         </ListItem>
-        <ListItem button onClick={() => router.push('/builder')}>
+        <ListItem button onClick={() => router.push('/builder')} disabled={!walletConnector}>
           <ListItemIcon>
             <Build />
           </ListItemIcon>
           <ListItemText primary="Game Builder" />
+        </ListItem>
+        <ListItem button onClick={() => router.push('/templates')} disabled={!walletConnector}>
+          <ListItemIcon>
+            <Gamepad />
+          </ListItemIcon>
+          <ListItemText primary="Templates" />
         </ListItem>
       </List>
     </div>
@@ -84,6 +85,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <Box sx={{ display: 'flex' }}>
+      <CssBaseline />
       <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
         <Toolbar>
           <IconButton
@@ -99,34 +101,10 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
             SomniaGames Studio
           </Typography>
-          <Button
-            color="inherit"
-            onClick={handleMenuOpen}
-            startIcon={<AccountCircle />}
-          >
-            0x1234...5678
-          </Button>
-          <Menu
-            anchorEl={anchorEl}
-            anchorOrigin={{
-              vertical: 'top',
-              horizontal: 'right',
-            }}
-            keepMounted
-            transformOrigin={{
-              vertical: 'top',
-              horizontal: 'right',
-            }}
-            open={Boolean(anchorEl)}
-            onClose={handleMenuClose}
-          >
-            <MenuItem onClick={handleLogout}>
-              <ListItemIcon>
-                <Logout fontSize="small" />
-              </ListItemIcon>
-              Logout
-            </MenuItem>
-          </Menu>
+          <WalletConnectorComponent 
+            onWalletConnected={handleWalletConnected}
+            onWalletDisconnected={handleWalletDisconnected}
+          />
         </Toolbar>
       </AppBar>
       

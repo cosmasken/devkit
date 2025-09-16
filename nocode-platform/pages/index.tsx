@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { 
   Container, 
   Typography, 
@@ -9,36 +9,34 @@ import {
   CardContent, 
   CardActions, 
   Avatar,
-  Chip
+  Chip,
+  Alert,
+  AlertTitle
 } from '@mui/material';
 import {
   SportsEsports,
-  AccountBalanceWallet,
   Speed,
   Security,
   EmojiEvents,
   ShoppingCart,
   Storage,
-  Code
+  Code,
+  Warning
 } from '@mui/icons-material';
 import Layout from '../components/Layout';
 import { useRouter } from 'next/router';
+import { useWallet } from '../contexts/WalletContext';
 
 const Home = () => {
   const router = useRouter();
-  const [connected, setConnected] = useState(false);
-
-  const handleConnectWallet = () => {
-    // In a real implementation, this would connect to wallet
-    setConnected(true);
-    alert('Wallet connected successfully!');
-  };
+  const { isConnected, account, connectWallet } = useWallet();
 
   const handleStartBuilding = () => {
-    if (connected) {
+    if (isConnected) {
       router.push('/builder');
     } else {
-      alert('Please connect your wallet first');
+      // Show instruction to connect wallet
+      alert('Please connect your wallet first by clicking the "Connect Wallet" button in the top right corner');
     }
   };
 
@@ -58,28 +56,27 @@ const Home = () => {
             Powered by Somnia Network&apos;s 1.05M TPS performance.
           </Typography>
           
-          <Button 
-            variant="contained" 
-            size="large" 
-            onClick={handleConnectWallet}
-            startIcon={<AccountBalanceWallet />}
-            sx={{ 
-              mt: 2, 
-              py: 1.5, 
-              px: 4, 
-              fontSize: '1.1rem',
-              backgroundColor: connected ? 'success.main' : 'primary.main',
-              '&:hover': {
-                backgroundColor: connected ? 'success.dark' : 'primary.dark'
-              },
-              mr: 2
-            }}
-          >
-            {connected ? 'Wallet Connected ✓' : 'Connect Wallet'}
-          </Button>
+          {!isConnected && (
+            <Alert 
+              severity="info" 
+              icon={<Warning />}
+              sx={{ 
+                mb: 3, 
+                maxWidth: '600px', 
+                mx: 'auto',
+                borderRadius: 2,
+                border: '1px solid',
+                borderColor: 'info.light'
+              }}
+            >
+              <AlertTitle>Connect Your Wallet</AlertTitle>
+              To get started, please connect your wallet by clicking the "Connect Wallet" button 
+              in the top right corner. This will enable you to create and deploy games on the blockchain.
+            </Alert>
+          )}
           
           <Button 
-            variant="outlined" 
+            variant="contained" 
             size="large" 
             onClick={handleStartBuilding}
             sx={{ 
@@ -110,7 +107,13 @@ const Home = () => {
                 </Typography>
               </CardContent>
               <CardActions>
-                <Button size="small" onClick={() => router.push('/templates')}>Explore Templates</Button>
+                <Button 
+                  size="small" 
+                  onClick={() => isConnected ? router.push('/templates') : alert('Please connect your wallet first')}
+                  disabled={!isConnected}
+                >
+                  Explore Templates
+                </Button>
               </CardActions>
             </Card>
           </Grid>
