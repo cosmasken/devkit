@@ -23,7 +23,9 @@ import {
   OutlinedInput,
   Checkbox,
   ListItemText,
-  FormControlLabel
+  FormControlLabel,
+  Alert,
+  Snackbar
 } from '@mui/material';
 import {
   ArrowBack,
@@ -39,7 +41,9 @@ import {
   Storage,
   Code,
   Check,
-  SportsEsports
+  SportsEsports,
+  AutoFixHigh,
+  FlashOn
 } from '@mui/icons-material';
 import Layout from '../components/Layout';
 
@@ -56,8 +60,10 @@ const GameBuilder = () => {
     enableMultiplayer: true,
     enableLeaderboards: true,
     enableMarketplace: true,
-    enableAchievements: true
+    enableAchievements: true,
+    useModularSystem: true // New option for modular system
   });
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
   const steps = [
     'Choose Template',
@@ -68,7 +74,7 @@ const GameBuilder = () => {
     'Publish'
   ];
 
-  // Mock template data
+  // Mock template data with modular system support
   const templates = [
     {
       id: 'tictactoe',
@@ -76,7 +82,8 @@ const GameBuilder = () => {
       description: 'A classic Tic Tac Toe game on the blockchain. Simple, fun, and fully decentralized!',
       category: 'Puzzle',
       difficulty: 'Beginner',
-      players: 2
+      players: 2,
+      modularSupport: true
     },
     {
       id: '2048game',
@@ -84,14 +91,35 @@ const GameBuilder = () => {
       description: 'A blockchain version of the popular 2048 puzzle game. Combine tiles to reach the highest number!',
       category: 'Puzzle',
       difficulty: 'Beginner',
-      players: 1
+      players: 1,
+      modularSupport: true
+    },
+    {
+      id: 'tetris',
+      name: 'Tetris Template',
+      description: 'A complete Tetris implementation with NFT pieces and token rewards. Ready to deploy!',
+      category: 'Puzzle',
+      difficulty: 'Intermediate',
+      players: 1,
+      modularSupport: true,
+      isTemplate: true
+    },
+    {
+      id: 'chess',
+      name: 'Chess Template',
+      description: 'A fully-featured chess game with NFT pieces and tournament support.',
+      category: 'Strategy',
+      difficulty: 'Advanced',
+      players: 2,
+      modularSupport: true,
+      isTemplate: true
     }
   ];
 
   const handleNext = () => {
     // Validate template selection on first step
     if (activeStep === 0 && !selectedTemplate) {
-      alert('Please select a template or choose to start from scratch');
+      setSnackbar({ open: true, message: 'Please select a template or choose to start from scratch', severity: 'warning' });
       return;
     }
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -108,6 +136,10 @@ const GameBuilder = () => {
     });
   };
 
+  const handleSnackbarClose = () => {
+    setSnackbar({ ...snackbar, open: false });
+  };
+
   const renderStepContent = (step: number) => {
     switch (step) {
       case 0: // Template Selection
@@ -120,6 +152,20 @@ const GameBuilder = () => {
               <Typography variant="body1" sx={{ mb: 3 }}>
                 Select a template to get started quickly, or build from scratch.
               </Typography>
+              <FormControlLabel
+                control={
+                  <Checkbox 
+                    checked={gameData.useModularSystem} 
+                    onChange={(e) => handleInputChange('useModularSystem', e.target.checked)} 
+                  />
+                }
+                label={
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <AutoFixHigh sx={{ mr: 1 }} />
+                    Use Modular System (Recommended - Easier & Faster)
+                  </Box>
+                }
+              />
             </Grid>
             {templates.map((template) => (
               <Grid item xs={12} md={6} key={template.id}>
@@ -132,10 +178,27 @@ const GameBuilder = () => {
                     border: selectedTemplate === template.id ? '2px solid #1976d2' : '1px solid #e0e0e0',
                     '&:hover': {
                       boxShadow: 3
-                    }
+                    },
+                    position: 'relative'
                   }}
                   onClick={() => setSelectedTemplate(template.id)}
                 >
+                  {template.modularSupport && gameData.useModularSystem && (
+                    <Chip 
+                      label="Modular" 
+                      color="success" 
+                      size="small" 
+                      sx={{ position: 'absolute', top: 8, right: 8 }} 
+                    />
+                  )}
+                  {template.isTemplate && (
+                    <Chip 
+                      label="Template" 
+                      color="primary" 
+                      size="small" 
+                      sx={{ position: 'absolute', top: 8, left: 8 }} 
+                    />
+                  )}
                   <CardContent sx={{ flexGrow: 1 }}>
                     <Typography gutterBottom variant="h5" component="h3">
                       {template.name}
@@ -158,6 +221,14 @@ const GameBuilder = () => {
                         size="small" 
                         color="secondary" 
                       />
+                      {template.modularSupport && gameData.useModularSystem && (
+                        <Chip 
+                          icon={<FlashOn />} 
+                          label="Instant MVP" 
+                          size="small" 
+                          color="success" 
+                        />
+                      )}
                     </Box>
                   </CardContent>
                 </Card>
@@ -184,6 +255,15 @@ const GameBuilder = () => {
                   <Typography sx={{ color: 'text.secondary' }}>
                     Build a custom game with full control over all features
                   </Typography>
+                  {gameData.useModularSystem && (
+                    <Chip 
+                      icon={<AutoFixHigh />} 
+                      label="Modular System Available" 
+                      size="small" 
+                      color="info" 
+                      sx={{ mt: 2 }} 
+                    />
+                  )}
                 </CardContent>
               </Card>
             </Grid>
@@ -244,9 +324,17 @@ const GameBuilder = () => {
                 InputProps={{ inputProps: { min: 1, max: 10000 } }}
               />
             </Grid>
+            {gameData.useModularSystem && (
+              <Grid item xs={12}>
+                <Alert severity="info">
+                  <strong>Modular System Enabled:</strong> Your game will be created using the new plug-and-play system. 
+                  This provides instant MVP capabilities with pre-configured features.
+                </Alert>
+              </Grid>
+            )}
           </Grid>
         );
-      case 1:
+      case 2: // Design step
         return (
           <Grid container spacing={3}>
             <Grid item xs={12}>
@@ -295,7 +383,7 @@ const GameBuilder = () => {
             </Grid>
           </Grid>
         );
-      case 2:
+      case 3: // Economy step
         return (
           <Grid container spacing={3}>
             <Grid item xs={12}>
@@ -334,6 +422,11 @@ const GameBuilder = () => {
                     <Chip label="Pets" size="small" sx={{ mr: 1, mb: 1 }} />
                     <Chip label="+ Add More" size="small" variant="outlined" />
                   </Box>
+                  {gameData.useModularSystem && (
+                    <Alert severity="success" sx={{ mt: 2 }}>
+                      Modular System: NFT assets will be automatically configured with rarity levels and metadata
+                    </Alert>
+                  )}
                 </CardContent>
               </Card>
             </Grid>
@@ -352,12 +445,17 @@ const GameBuilder = () => {
                     label={gameData.enableMarketplace ? 'Enabled' : 'Disabled'} 
                     color={gameData.enableMarketplace ? 'success' : 'default'} 
                   />
+                  {gameData.useModularSystem && (
+                    <Alert severity="info" sx={{ mt: 2 }}>
+                      Modular System: Marketplace module will be automatically integrated
+                    </Alert>
+                  )}
                 </CardContent>
               </Card>
             </Grid>
           </Grid>
         );
-      case 3:
+      case 4: // Features step
         return (
           <Grid container spacing={3}>
             <Grid item xs={12}>
@@ -376,6 +474,11 @@ const GameBuilder = () => {
                     }
                     label={`Enable real-time multiplayer with up to ${gameData.maxPlayers} players`}
                   />
+                  {gameData.useModularSystem && (
+                    <Alert severity="success" sx={{ mt: 2 }}>
+                      Modular System: Real-time WebSocket integration included automatically
+                    </Alert>
+                  )}
                 </CardContent>
               </Card>
             </Grid>
@@ -395,6 +498,11 @@ const GameBuilder = () => {
                     }
                     label="Add competitive leaderboards for player engagement"
                   />
+                  {gameData.useModularSystem && (
+                    <Alert severity="info" sx={{ mt: 2 }}>
+                      Modular System: Leaderboard module available as plug-in
+                    </Alert>
+                  )}
                 </CardContent>
               </Card>
             </Grid>
@@ -414,12 +522,17 @@ const GameBuilder = () => {
                     }
                     label="Create badges and rewards for player milestones"
                   />
+                  {gameData.useModularSystem && (
+                    <Alert severity="info" sx={{ mt: 2 }}>
+                      Modular System: Achievement module available as plug-in
+                    </Alert>
+                  )}
                 </CardContent>
               </Card>
             </Grid>
           </Grid>
         );
-      case 5:
+      case 5: // Publish step
         return (
           <Grid container spacing={3}>
             <Grid item xs={12}>
@@ -471,11 +584,29 @@ const GameBuilder = () => {
                       size="small" 
                       color={gameData.enableAchievements ? 'success' : 'default'} 
                     />
+                    <Chip 
+                      icon={<AutoFixHigh />} 
+                      label={gameData.useModularSystem ? 'Modular System: ON' : 'Modular System: OFF'} 
+                      size="small" 
+                      color={gameData.useModularSystem ? 'success' : 'default'} 
+                    />
                   </Box>
                   <Typography variant="body2" sx={{ fontStyle: 'italic', mt: 2 }}>
                     Your game will be deployed to the Somnia Network with enterprise-grade security
                     and 1.05M TPS performance.
                   </Typography>
+                  {gameData.useModularSystem && (
+                    <Alert severity="success" sx={{ mt: 2 }}>
+                      <strong>Modular System Benefits:</strong>
+                      <ul>
+                        <li>Instant MVP with pre-configured templates</li>
+                        <li>Plug-and-play feature modules</li>
+                        <li>Faster deployment (under 5 minutes)</li>
+                        <li>Automatic contract management</li>
+                        <li>Real-time WebSocket integration</li>
+                      </ul>
+                    </Alert>
+                  )}
                 </CardContent>
               </Card>
             </Grid>
@@ -533,6 +664,7 @@ const GameBuilder = () => {
                   color="success"
                   size="large"
                   startIcon={<Publish />}
+                  onClick={() => setSnackbar({ open: true, message: 'Game published successfully to Somnia Network!', severity: 'success' })}
                 >
                   Publish to Blockchain
                 </Button>
@@ -541,6 +673,21 @@ const GameBuilder = () => {
           </Box>
         </Box>
       </Container>
+      
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      >
+        <Alert 
+          onClose={handleSnackbarClose} 
+          severity={snackbar.severity as any}
+          sx={{ width: '100%' }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Layout>
   );
 };

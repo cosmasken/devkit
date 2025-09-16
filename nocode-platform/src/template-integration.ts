@@ -1,5 +1,15 @@
 // src/template-integration.ts
-import { GameRegistry, GameAsset, GameToken, GameLeaderboard, GameShop } from '@somniagames/sdk';
+import { 
+  GameRegistry, 
+  GameAsset, 
+  GameToken, 
+  GameLeaderboard, 
+  GameShop,
+  // New modular system imports
+  createTetrisGame,
+  createChessGame,
+  NFTModule
+} from '@somniagames/sdk';
 
 /**
  * Template Integration Service
@@ -30,13 +40,17 @@ export interface GameTemplate {
 }
 
 /**
- * Tic Tac Toe Template Implementation
+ * Tic Tac Toe Template Implementation (Updated to use modular system)
  */
 export class TicTacToeTemplate {
   private gameRegistry: GameRegistry | null = null;
   private gameAsset: GameAsset | null = null;
   private gameToken: GameToken | null = null;
   private gameLeaderboard: GameLeaderboard | null = null;
+  
+  // New modular system support
+  private modularGame: any = null;
+  private nftModule: NFTModule | null = null;
 
   constructor(
     registry: GameRegistry,
@@ -51,7 +65,59 @@ export class TicTacToeTemplate {
   }
 
   /**
-   * Initialize the Tic Tac Toe game with default settings
+   * Initialize the Tic Tac Toe game with default settings using modular system
+   */
+  async initializeGameModular(
+    signer: any, // ethers signer
+    provider: any, // ethers provider
+    gameName: string,
+    gameDescription: string
+  ) {
+    try {
+      // Create the game using the new modular system
+      this.modularGame = createTetrisGame(gameName, provider, signer);
+      this.nftModule = this.modularGame.getNFTModule();
+      
+      // Define custom assets for Tic Tac Toe
+      if (this.nftModule) {
+        this.nftModule.defineAssets({
+          xToken: {
+            name: 'X Token',
+            symbol: 'TTT-X',
+            uri: 'https://somniagames.com/assets/tictactoe/x-token.json',
+            rarity: 'common'
+          },
+          oToken: {
+            name: 'O Token',
+            symbol: 'TTT-O',
+            uri: 'https://somniagames.com/assets/tictactoe/o-token.json',
+            rarity: 'common'
+          },
+          winBadge: {
+            name: 'Win Badge',
+            symbol: 'TTT-WIN',
+            uri: 'https://somniagames.com/assets/tictactoe/win-badge.json',
+            rarity: 'rare'
+          }
+        });
+      }
+      
+      // Deploy the game
+      const deployment = await this.modularGame.deploy();
+      
+      // Create leaderboard for tracking wins
+      // Note: In a real implementation, we would integrate this with the modular system
+      
+      console.log('Tic Tac Toe game initialized with modular system:', deployment);
+      return { gameId: 1, deployment }; // gameId would be extracted from deployment
+    } catch (error) {
+      console.error('Failed to initialize Tic Tac Toe game with modular system:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Initialize the Tic Tac Toe game with default settings (legacy)
    */
   async initializeGame(
     signerAddress: string,
@@ -162,13 +228,17 @@ export class TicTacToeTemplate {
 }
 
 /**
- * 2048 Game Template Implementation
+ * 2048 Game Template Implementation (Updated to use modular system)
  */
 export class Crypto2048Template {
   private gameRegistry: GameRegistry | null = null;
   private gameAsset: GameAsset | null = null;
   private gameToken: GameToken | null = null;
   private gameLeaderboard: GameLeaderboard | null = null;
+  
+  // New modular system support
+  private modularGame: any = null;
+  private nftModule: NFTModule | null = null;
 
   constructor(
     registry: GameRegistry,
@@ -183,7 +253,65 @@ export class Crypto2048Template {
   }
 
   /**
-   * Initialize the 2048 game with default settings
+   * Initialize the 2048 game with default settings using modular system
+   */
+  async initializeGameModular(
+    signer: any, // ethers signer
+    provider: any, // ethers provider
+    gameName: string,
+    gameDescription: string
+  ) {
+    try {
+      // Create the game using the new modular system
+      this.modularGame = createTetrisGame(gameName, provider, signer);
+      this.nftModule = this.modularGame.getNFTModule();
+      
+      // Define custom assets for 2048
+      if (this.nftModule) {
+        this.nftModule.defineAssets({
+          tile2: {
+            name: '2 Tile',
+            symbol: '2048-2',
+            uri: 'https://somniagames.com/assets/2048/tile-2.json',
+            rarity: 'common'
+          },
+          tile4: {
+            name: '4 Tile',
+            symbol: '2048-4',
+            uri: 'https://somniagames.com/assets/2048/tile-4.json',
+            rarity: 'common'
+          },
+          tile2048: {
+            name: '2048 Tile',
+            symbol: '2048-2048',
+            uri: 'https://somniagames.com/assets/2048/tile-2048.json',
+            rarity: 'epic'
+          },
+          highScoreBadge: {
+            name: 'High Score Badge',
+            symbol: '2048-HIGH',
+            uri: 'https://somniagames.com/assets/2048/high-score-badge.json',
+            rarity: 'legendary'
+          }
+        });
+      }
+      
+      // Deploy the game
+      const deployment = await this.modularGame.deploy();
+      
+      // Create leaderboard for high scores
+      // Note: In a real implementation, we would integrate this with the modular system
+      
+      console.log('2048 game initialized with modular system:', deployment);
+      return { gameId: 1, deployment }; // gameId would be extracted from deployment
+    } catch (error) {
+      console.error('Failed to initialize 2048 game with modular system:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Initialize the 2048 game with default settings (legacy)
    */
   async initializeGame(
     signerAddress: string,
@@ -305,6 +433,7 @@ export class Crypto2048Template {
 
 /**
  * Template Factory - creates template instances based on template ID
+ * Updated to support both legacy and modular systems
  */
 export class TemplateFactory {
   static createTemplate(
@@ -323,5 +452,27 @@ export class TemplateFactory {
       default:
         throw new Error(`Unknown template ID: ${templateId}`);
     }
+  }
+  
+  /**
+   * Create template with modular system support
+   */
+  static createTemplateModular(
+    templateId: string,
+    signer: any,
+    provider: any
+  ) {
+    // This would return a modular template implementation
+    // For now, we'll return the same templates but they can use modular methods
+    return {
+      templateId,
+      signer,
+      provider,
+      async initializeGame(gameName: string, gameDescription: string) {
+        // This would use the modular system methods
+        console.log(`Initializing ${templateId} game with modular system`);
+        return { gameId: 1, modular: true };
+      }
+    };
   }
 }

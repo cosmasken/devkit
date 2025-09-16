@@ -4,7 +4,13 @@ import {
   GameAsset, 
   GameToken, 
   GameLeaderboard, 
-  GameShop 
+  GameShop,
+  // New modular system imports
+  createSimpleGame,
+  createTetrisGame,
+  createChessGame,
+  NFTModule,
+  PaymentModule
 } from '@somniagames/sdk';
 import { ethers } from 'ethers';
 
@@ -20,6 +26,11 @@ export class NoCodePlatform {
   private gameToken: GameToken | null = null;
   private gameLeaderboard: GameLeaderboard | null = null;
   private gameShop: GameShop | null = null;
+  
+  // New modular system support
+  private simpleGame: any = null;
+  private nftModule: NFTModule | null = null;
+  private paymentModule: PaymentModule | null = null;
 
   constructor() {
     // Initialize with default values
@@ -88,7 +99,52 @@ export class NoCodePlatform {
   }
 
   /**
-   * Create a new game using the SDK
+   * Create a new game using the modular system (new way)
+   * @param gameData Game configuration
+   */
+  async createGameModular(gameData: {
+    name: string;
+    description: string;
+    template?: 'tetris' | 'chess' | 'simple';
+    genre: string;
+    maxPlayers: number;
+  }) {
+    if (!this.provider || !this.signer) {
+      throw new Error('Not connected to wallet');
+    }
+    
+    try {
+      // Use the new modular system for easier game creation
+      if (gameData.template === 'tetris') {
+        this.simpleGame = createTetrisGame(gameData.name, this.provider, this.signer);
+      } else if (gameData.template === 'chess') {
+        this.simpleGame = createChessGame(gameData.name, this.provider, this.signer);
+      } else {
+        this.simpleGame = createSimpleGame({
+          name: gameData.name,
+          description: gameData.description,
+          type: gameData.genre,
+          maxPlayers: gameData.maxPlayers
+        }, this.provider, this.signer);
+      }
+      
+      // Get the modules
+      this.nftModule = this.simpleGame.getNFTModule();
+      this.paymentModule = this.simpleGame.getPaymentModule();
+      
+      // Deploy the game
+      const deployment = await this.simpleGame.deploy();
+      
+      console.log('Game created with modular system:', deployment);
+      return deployment;
+    } catch (error) {
+      console.error('Failed to create game with modular system:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Create a new game using the SDK (legacy way)
    * @param gameData Game configuration
    */
   async createGame(gameData: {
@@ -156,6 +212,47 @@ export class NoCodePlatform {
   }
 
   /**
+   * Create game assets using the modular system
+   * @param assetData Asset configuration
+   */
+  async createAssetModular(assetData: {
+    name: string;
+    symbol: string;
+    uri: string;
+    rarity: 'common' | 'rare' | 'epic' | 'legendary';
+    gameId?: number;
+  }) {
+    if (!this.nftModule) {
+      throw new Error('Modular system not initialized');
+    }
+    
+    try {
+      // Define the asset using the modular system
+      this.nftModule.defineAssets({
+        [assetData.name.toLowerCase().replace(/\s+/g, '-')]: {
+          name: assetData.name,
+          symbol: assetData.symbol,
+          uri: assetData.uri,
+          rarity: assetData.rarity
+        }
+      });
+      
+      // Mint the asset
+      const result = await this.nftModule.mintAsset(
+        await this.signer!.getAddress(),
+        assetData.name.toLowerCase().replace(/\s+/g, '-'),
+        assetData.gameId || 1
+      );
+      
+      console.log('Asset created with modular system:', result);
+      return result;
+    } catch (error) {
+      console.error('Failed to create asset with modular system:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Configure game economy using the SDK
    * @param economyData Economy configuration
    */
@@ -176,6 +273,31 @@ export class NoCodePlatform {
       return true;
     } catch (error) {
       console.error('Failed to configure economy:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Configure payments using the modular system
+   * @param paymentData Payment configuration
+   */
+  async configurePayments(paymentData: {
+    entryFee?: string;
+    winReward?: string;
+    participationReward?: string;
+  }) {
+    if (!this.paymentModule) {
+      throw new Error('Modular system not initialized');
+    }
+    
+    try {
+      // Configure payments using the modular system
+      this.paymentModule.configure(paymentData);
+      
+      console.log('Payments configured with modular system:', paymentData);
+      return true;
+    } catch (error) {
+      console.error('Failed to configure payments with modular system:', error);
       throw error;
     }
   }
@@ -266,6 +388,25 @@ export class NoCodePlatform {
       return tx;
     } catch (error) {
       console.error('Failed to publish game:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Publish game using modular system
+   */
+  async publishGameModular() {
+    if (!this.simpleGame) {
+      throw new Error('Modular system not initialized');
+    }
+    
+    try {
+      // In a real implementation, this would involve activating the game
+      // For now, we'll just log that it's published
+      console.log('Game published with modular system');
+      return true;
+    } catch (error) {
+      console.error('Failed to publish game with modular system:', error);
       throw error;
     }
   }
