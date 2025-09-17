@@ -18,7 +18,11 @@ import {
   Gamepad,
   Dashboard,
   Build,
-  Home
+  Home,
+  AccountBalance,
+  Savings,
+  SwapHoriz,
+  Groups
 } from '@mui/icons-material';
 import { useRouter } from 'next/router';
 import WalletConnectorComponent from './WalletConnector';

@@ -14,6 +14,12 @@ export { NFTModule, NFTAssetConfig } from './modules/NFTModule';
 export { PaymentModule, PaymentConfig } from './modules/PaymentModule';
 export { deployContract, getContract, executeTransaction } from './modules/DeploymentUtils';
 
+// DeFi module exports
+export { YieldFarmingModule } from './modules/YieldFarmingModule';
+export { LendingModule } from './modules/LendingModule';
+export { AMMModule } from './modules/AMMModule';
+export { GuildModule } from './modules/GuildModule';
+
 export interface GameConfig {
   rpcUrl: string;
   chainId: number;

@@ -13,7 +13,8 @@
     "test": "jest",
     "test:coverage": "jest --coverage",
     "dev": "tsc --watch",
-    "start-websocket": "node websocket-server.js"
+    "start-websocket": "node websocket-server.js",
+    "demo:defi": "ts-node examples/defi-integration-demo.ts"
   },
   "keywords": [
     "somnia",
