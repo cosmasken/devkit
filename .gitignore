@@ -50,3 +50,4 @@
 # Development markdown files (exclude all except README.md)
 *.md
 !README.md
+HACKATHON_IMPROVEMENT_PLAN.md
