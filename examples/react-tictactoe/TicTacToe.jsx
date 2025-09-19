@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { SomniaGameKit } from '../../dist/index.js';
+import { SomniaGameKit } from '../../dist/esm/index.js';
 
 const TicTacToe = () => {
   const [sdk] = useState(new SomniaGameKit());

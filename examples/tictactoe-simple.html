@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic-Tac-Toe - Somnia GameKit</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            text-align: center; 
+            padding: 20px; 
+            max-width: 600px; 
+            margin: 0 auto; 
+        }
+        .status { 
+            background: #f0f0f0; 
+            padding: 10px; 
+            border-radius: 5px; 
+            margin: 20px 0; 
+        }
+        .demo-note { 
+            background: #fff3cd; 
+            border: 1px solid #ffeaa7; 
+            padding: 15px; 
+            border-radius: 5px; 
+            margin: 20px 0; 
+        }
+        .board { 
+            display: grid; 
+            grid-template-columns: repeat(3, 100px); 
+            gap: 5px; 
+            justify-content: center; 
+            margin: 20px auto; 
+        }
+        .square { 
+            width: 100px; 
+            height: 100px; 
+            font-size: 24px; 
+            font-weight: bold; 
+            border: 2px solid #333; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            background: #fff; 
+        }
+        .square:disabled { 
+            cursor: not-allowed; 
+            background: #e0e0e0; 
+        }
+        button { 
+            padding: 10px 20px; 
+            font-size: 16px; 
+            margin: 5px; 
+            cursor: pointer; 
+        }
+        .winner { 
+            background: #d4edda; 
+            border: 1px solid #c3e6cb; 
+            padding: 15px; 
+            border-radius: 5px; 
+            margin: 20px 0; 
+        }
+    </style>
+</head>
+<body>
+    <h1>🎮 Tic-Tac-Toe on Somnia</h1>
+    <p>Blockchain-powered tic-tac-toe with NFT rewards!</p>
+    
+    <div class="demo-note">
+        <strong>Demo Mode:</strong> This simulates the blockchain game flow. 
+        Each move would be recorded on Somnia Network with real SDK integration.
+    </div>
+    
+    <div class="status" id="status">Click "Start Game" to begin</div>
+    
+    <div>
+        <button onclick="startGame()">Start New Game</button>
+        <button onclick="resetGame()">Reset</button>
+    </div>
+
+    <div class="board" id="board"></div>
+
+    <div id="winner" class="winner" style="display: none;">
+        <h3>🏆 Game Over!</h3>
+        <p id="winner-text"></p>
+        <p>Victory NFT minted to wallet!</p>
+    </div>
+
+    <script>
+        let board = Array(9).fill(null);
+        let isXNext = true;
+        let winner = null;
+        let gameStarted = false;
+
+        const lines = [
+            [0, 1, 2], [3, 4, 5], [6, 7, 8],
+            [0, 3, 6], [1, 4, 7], [2, 5, 8],
+            [0, 4, 8], [2, 4, 6]
+        ];
+
+        function calculateWinner(squares) {
+            for (let line of lines) {
+                const [a, b, c] = line;
+                if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
+                    return squares[a];
+                }
+            }
+            return null;
+        }
+
+        function updateStatus(message) {
+            document.getElementById('status').textContent = message;
+        }
+
+        function renderBoard() {
+            const boardElement = document.getElementById('board');
+            boardElement.innerHTML = '';
+            
+            for (let i = 0; i < 9; i++) {
+                const square = document.createElement('button');
+                square.className = 'square';
+                square.textContent = board[i] || '';
+                square.disabled = board[i] || winner || !gameStarted;
+                square.onclick = () => makeMove(i);
+                boardElement.appendChild(square);
+            }
+        }
+
+        function delay(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        async function startGame() {
+            updateStatus('Initializing SDK...');
+            await delay(500);
+            updateStatus('Creating player...');
+            await delay(500);
+            updateStatus('Deploying game contract...');
+            await delay(1000);
+            updateStatus('Starting game session...');
+            await delay(500);
+            updateStatus('Game ready! Make your move (X goes first)');
+            
+            board = Array(9).fill(null);
+            isXNext = true;
+            winner = null;
+            gameStarted = true;
+            document.getElementById('winner').style.display = 'none';
+            renderBoard();
+        }
+
+        async function makeMove(index) {
+            if (!gameStarted || board[index] || winner) return;
+
+            board[index] = isXNext ? 'X' : 'O';
+            renderBoard();
+
+            updateStatus('Recording move on blockchain...');
+            await delay(800);
+
+            const gameWinner = calculateWinner(board);
+            if (gameWinner) {
+                winner = gameWinner;
+                updateStatus(`Winner: ${gameWinner}! 🎉 Minting victory NFT...`);
+                await delay(1000);
+                updateStatus(`Winner: ${gameWinner}! Victory NFT minted! 🏆`);
+                
+                document.getElementById('winner-text').textContent = `Winner: ${gameWinner}`;
+                document.getElementById('winner').style.display = 'block';
+            } else if (board.every(square => square)) {
+                updateStatus("It's a draw! Game recorded on blockchain.");
+            } else {
+                isXNext = !isXNext;
+                updateStatus(`Next player: ${!isXNext ? 'X' : 'O'}`);
+            }
+            
+            renderBoard();
+        }
+
+        function resetGame() {
+            board = Array(9).fill(null);
+            isXNext = true;
+            winner = null;
+            gameStarted = false;
+            updateStatus('Click "Start Game" to begin');
+            document.getElementById('winner').style.display = 'none';
+            renderBoard();
+        }
+
+        // Initialize empty board
+        renderBoard();
+    </script>
+</body>
+</html>
