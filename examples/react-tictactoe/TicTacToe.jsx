@@ -4,11 +4,13 @@ import { SomniaGameKit } from '../../dist/esm/index.js';
 const TicTacToe = () => {
   const [sdk] = useState(new SomniaGameKit());
   const [player, setPlayer] = useState(null);
+  const [walletAddress, setWalletAddress] = useState(null);
   const [gameId, setGameId] = useState(null);
   const [board, setBoard] = useState(Array(9).fill(null));
   const [isXNext, setIsXNext] = useState(true);
-  const [status, setStatus] = useState('Click "Start Game" to begin');
+  const [status, setStatus] = useState('Connect your wallet to start playing');
   const [winner, setWinner] = useState(null);
+  const [nfts, setNfts] = useState([]);
 
   const calculateWinner = (squares) => {
     const lines = [
@@ -25,31 +27,45 @@ const TicTacToe = () => {
     return null;
   };
 
-  const startGame = async () => {
+  const connectWallet = async () => {
     try {
       setStatus('Initializing SDK...');
       await sdk.initialize({ network: 'somnia-testnet' });
       
+      setStatus('Connecting wallet...');
+      const address = await sdk.connectWallet();
+      setWalletAddress(address);
+      
       setStatus('Creating player...');
       const newPlayer = sdk.createPlayer({ 
-        username: 'TicTacToePlayer', 
+        username: 'Player', 
         avatar: 'https://example.com/avatar.png' 
       });
       setPlayer(newPlayer);
       
-      setStatus('Deploying game...');
+      setStatus(`Connected! ${address.slice(0,8)}... - Click "Start Game"`);
+    } catch (error) {
+      setStatus(`Connection failed: ${error.message}`);
+    }
+  };
+
+  const startGame = async () => {
+    if (!player) return;
+    
+    try {
+      setStatus('Deploying game contract...');
       const game = await sdk.deployGame(1);
       setGameId(game.id);
       
       setStatus('Starting game session...');
-      await sdk.startGame(game.id, [newPlayer.id]);
+      await sdk.startGame(game.id, [player.id]);
       
-      setStatus('Game ready! Make your move (X goes first)');
+      setStatus('Game ready! X goes first');
       setBoard(Array(9).fill(null));
       setIsXNext(true);
       setWinner(null);
     } catch (error) {
-      setStatus(`Error: ${error.message}`);
+      setStatus(`Game start failed: ${error.message}`);
     }
   };
 
@@ -61,7 +77,7 @@ const TicTacToe = () => {
     setBoard(newBoard);
 
     try {
-      // Record move on blockchain
+      setStatus('Recording move on blockchain...');
       await sdk.makeMove(gameId, player.id, {
         position: index,
         symbol: isXNext ? 'X' : 'O',
@@ -71,34 +87,54 @@ const TicTacToe = () => {
       const gameWinner = calculateWinner(newBoard);
       if (gameWinner) {
         setWinner(gameWinner);
-        setStatus(`Winner: ${gameWinner}! 🎉`);
-        
-        // Mint winner NFT
-        await sdk.mintNFT(player.id, {
-          name: 'Tic-Tac-Toe Victory',
-          description: `Won as ${gameWinner}`,
-          image: 'https://example.com/trophy.png'
-        });
-        
-        // End game session
+        setStatus(`Winner: ${gameWinner}! 🎉 Click "Mint Victory NFT"`);
         await sdk.endGame(gameId, { winner: gameWinner, board: newBoard });
       } else if (newBoard.every(square => square)) {
-        setStatus("It's a draw!");
+        setStatus("It's a draw! Game recorded on blockchain");
         await sdk.endGame(gameId, { winner: 'draw', board: newBoard });
       } else {
         setIsXNext(!isXNext);
         setStatus(`Next player: ${!isXNext ? 'X' : 'O'}`);
       }
     } catch (error) {
-      setStatus(`Move error: ${error.message}`);
+      setStatus(`Move failed: ${error.message}`);
     }
   };
 
-  const resetGame = () => {
-    setBoard(Array(9).fill(null));
-    setIsXNext(true);
-    setWinner(null);
-    setStatus('Game reset! X goes first');
+  const mintVictoryNFT = async () => {
+    if (!winner || !player) return;
+    
+    try {
+      setStatus('Minting victory NFT...');
+      const nft = await sdk.mintNFT(player.id, {
+        name: `Tic-Tac-Toe Victory (${winner})`,
+        description: `Won as ${winner} on ${new Date().toLocaleDateString()}`,
+        image: 'https://example.com/trophy.png'
+      });
+      
+      setNfts(prev => [...prev, nft]);
+      setStatus(`Victory NFT minted! Token ID: ${nft.tokenId} 🏆`);
+    } catch (error) {
+      setStatus(`NFT mint failed: ${error.message}`);
+    }
+  };
+
+  const mintCollectibleNFT = async () => {
+    if (!player) return;
+    
+    try {
+      setStatus('Minting collectible NFT...');
+      const nft = await sdk.mintNFT(player.id, {
+        name: 'Tic-Tac-Toe Player',
+        description: 'Played tic-tac-toe on Somnia Network',
+        image: 'https://example.com/player-badge.png'
+      });
+      
+      setNfts(prev => [...prev, nft]);
+      setStatus(`Player NFT minted! Token ID: ${nft.tokenId}`);
+    } catch (error) {
+      setStatus(`NFT mint failed: ${error.message}`);
+    }
   };
 
   useEffect(() => {
@@ -124,30 +160,81 @@ const TicTacToe = () => {
       </div>
       
       <div style={{ marginBottom: '20px' }}>
-        <button 
-          onClick={startGame}
-          style={{ 
-            padding: '10px 20px', 
-            fontSize: '16px', 
-            marginRight: '10px',
-            cursor: 'pointer' 
-          }}
-        >
-          Start New Game
-        </button>
-        <button 
-          onClick={resetGame}
-          disabled={!gameId}
-          style={{ 
-            padding: '10px 20px', 
-            fontSize: '16px',
-            cursor: gameId ? 'pointer' : 'not-allowed',
-            opacity: gameId ? 1 : 0.5
-          }}
-        >
-          Reset Board
-        </button>
+        {!walletAddress ? (
+          <button 
+            onClick={connectWallet}
+            style={{ 
+              padding: '12px 24px', 
+              fontSize: '16px', 
+              backgroundColor: '#007bff',
+              color: 'white',
+              border: 'none',
+              borderRadius: '5px',
+              cursor: 'pointer',
+              marginRight: '10px'
+            }}
+          >
+            🔗 Connect Wallet
+          </button>
+        ) : (
+          <>
+            <button 
+              onClick={startGame}
+              disabled={!player}
+              style={{ 
+                padding: '10px 20px', 
+                fontSize: '16px', 
+                marginRight: '10px',
+                cursor: player ? 'pointer' : 'not-allowed',
+                opacity: player ? 1 : 0.5
+              }}
+            >
+              🎯 Start New Game
+            </button>
+            
+            <button 
+              onClick={mintCollectibleNFT}
+              disabled={!player}
+              style={{ 
+                padding: '10px 20px', 
+                fontSize: '16px',
+                backgroundColor: '#28a745',
+                color: 'white',
+                border: 'none',
+                borderRadius: '5px',
+                cursor: player ? 'pointer' : 'not-allowed',
+                opacity: player ? 1 : 0.5,
+                marginRight: '10px'
+              }}
+            >
+              🎨 Mint Player NFT
+            </button>
+
+            {winner && (
+              <button 
+                onClick={mintVictoryNFT}
+                style={{ 
+                  padding: '10px 20px', 
+                  fontSize: '16px',
+                  backgroundColor: '#ffc107',
+                  color: 'black',
+                  border: 'none',
+                  borderRadius: '5px',
+                  cursor: 'pointer'
+                }}
+              >
+                🏆 Mint Victory NFT
+              </button>
+            )}
+          </>
+        )}
       </div>
+
+      {walletAddress && (
+        <div style={{ marginBottom: '20px', fontSize: '14px', color: '#666' }}>
+          Wallet: {walletAddress.slice(0,8)}...{walletAddress.slice(-6)} | NFTs: {nfts.length}
+        </div>
+      )}
 
       <div style={{
         display: 'grid',
@@ -165,7 +252,7 @@ const TicTacToe = () => {
               height: '100px',
               fontSize: '24px',
               fontWeight: 'bold',
-              cursor: square || winner ? 'not-allowed' : 'pointer',
+              cursor: square || winner || !gameId ? 'not-allowed' : 'pointer',
               background: square ? '#e0e0e0' : '#fff',
               border: '2px solid #333',
               borderRadius: '5px'
@@ -187,7 +274,24 @@ const TicTacToe = () => {
         }}>
           <h3>🏆 Game Over!</h3>
           <p>Winner: {winner}</p>
-          <p>Victory NFT minted to your wallet!</p>
+          <p>Don't forget to mint your victory NFT!</p>
+        </div>
+      )}
+
+      {nfts.length > 0 && (
+        <div style={{
+          background: '#f8f9fa',
+          border: '1px solid #dee2e6',
+          padding: '15px',
+          borderRadius: '5px',
+          margin: '20px 0'
+        }}>
+          <h3>🎨 Your NFTs ({nfts.length})</h3>
+          {nfts.map((nft, index) => (
+            <div key={index} style={{ margin: '5px 0', fontSize: '14px' }}>
+              {nft.name} - Token ID: {nft.tokenId}
+            </div>
+          ))}
         </div>
       )}
     </div>
