@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Card Game - Somnia GameKit</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .card { border: 2px solid #333; border-radius: 10px; padding: 15px; margin: 10px; display: inline-block; width: 200px; }
+        .fire { border-color: #ff4444; background: #ffe6e6; }
+        .ice { border-color: #4444ff; background: #e6e6ff; }
+        .lightning { border-color: #ffff44; background: #fffff0; }
+        button { padding: 10px 20px; margin: 5px; font-size: 16px; cursor: pointer; }
+        .status { background: #f0f0f0; padding: 10px; border-radius: 5px; margin: 10px 0; }
+        .collection { display: flex; flex-wrap: wrap; }
+    </style>
+</head>
+<body>
+    <h1>🎮 Simple Card Game</h1>
+    <p>Collect NFT cards on the Somnia Network!</p>
+    
+    <div class="status" id="status">Click "Start Game" to begin</div>
+    
+    <div>
+        <button onclick="startGame()">Start Game</button>
+        <button onclick="collectCard('Fire Dragon', 'fire')">Collect Fire Dragon</button>
+        <button onclick="collectCard('Ice Wizard', 'ice')">Collect Ice Wizard</button>
+        <button onclick="collectCard('Lightning Bolt', 'lightning')">Collect Lightning Bolt</button>
+        <button onclick="viewCollection()">View Collection</button>
+    </div>
+    
+    <h2>Your Collection</h2>
+    <div id="collection" class="collection">
+        <p>No cards collected yet</p>
+    </div>
+
+    <script type="module">
+        import { SomniaGameKit } from '../dist/index.js';
+        
+        let sdk = new SomniaGameKit();
+        let player = null;
+        let gameId = null;
+        let cards = [];
+        
+        function updateStatus(message) {
+            document.getElementById('status').textContent = message;
+        }
+        
+        function updateCollection() {
+            const collection = document.getElementById('collection');
+            if (cards.length === 0) {
+                collection.innerHTML = '<p>No cards collected yet</p>';
+                return;
+            }
+            
+            collection.innerHTML = cards.map(card => `
+                <div class="card ${card.type || ''}">
+                    <h3>${card.name}</h3>
+                    <p>${card.description}</p>
+                    <small>Token ID: ${card.tokenId}</small>
+                </div>
+            `).join('');
+        }
+        
+        window.startGame = async function() {
+            try {
+                updateStatus('Initializing SDK...');
+                await sdk.initialize({ network: 'somnia-testnet' });
+                
+                updateStatus('Connecting wallet...');
+                const walletAddress = await sdk.connectWallet();
+                
+                updateStatus('Creating player...');
+                player = sdk.createPlayer({ 
+                    username: 'CardPlayer', 
+                    avatar: 'https://example.com/avatar.png' 
+                });
+                
+                updateStatus('Deploying game...');
+                const game = await sdk.deployGame(1);
+                gameId = game.id;
+                
+                updateStatus('Starting game session...');
+                await sdk.startGame(gameId, [player.id]);
+                
+                updateStatus(`Game ready! Wallet: ${walletAddress.slice(0,8)}...`);
+            } catch (error) {
+                updateStatus(`Error: ${error.message}`);
+            }
+        };
+        
+        window.collectCard = async function(cardName, cardType) {
+            if (!player) {
+                updateStatus('Please start the game first!');
+                return;
+            }
+            
+            try {
+                updateStatus(`Collecting ${cardName}...`);
+                const card = await sdk.mintNFT(player.id, {
+                    name: cardName,
+                    description: `A rare ${cardName} card`,
+                    image: `https://example.com/cards/${cardName.toLowerCase().replace(' ', '-')}.png`
+                });
+                
+                cards.push({ ...card, type: cardType });
+                updateCollection();
+                updateStatus(`${cardName} collected! Token ID: ${card.tokenId}`);
+            } catch (error) {
+                updateStatus(`Error collecting card: ${error.message}`);
+            }
+        };
+        
+        window.viewCollection = async function() {
+            if (!player) {
+                updateStatus('Please start the game first!');
+                return;
+            }
+            
+            try {
+                updateStatus('Loading collection...');
+                const playerCards = await sdk.getPlayerNFTs(player.id);
+                cards = playerCards;
+                updateCollection();
+                updateStatus(`Collection loaded: ${cards.length} cards`);
+            } catch (error) {
+                updateStatus(`Error loading collection: ${error.message}`);
+            }
+        };
+    </script>
+</body>
+</html>
