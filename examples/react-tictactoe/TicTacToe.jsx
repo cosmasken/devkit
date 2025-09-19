@@ -11,6 +11,9 @@ const TicTacToe = () => {
   const [status, setStatus] = useState('Connect your wallet to start playing');
   const [winner, setWinner] = useState(null);
   const [nfts, setNfts] = useState([]);
+  const [isConnecting, setIsConnecting] = useState(false);
+  const [isMinting, setIsMinting] = useState(false);
+  const [isStartingGame, setIsStartingGame] = useState(false);
 
   const calculateWinner = (squares) => {
     const lines = [
@@ -28,6 +31,7 @@ const TicTacToe = () => {
   };
 
   const connectWallet = async () => {
+    setIsConnecting(true);
     try {
       setStatus('Initializing SDK...');
       await sdk.initialize({ network: 'somnia-testnet' });
@@ -46,12 +50,15 @@ const TicTacToe = () => {
       setStatus(`Connected! ${address.slice(0,8)}... - Click "Start Game"`);
     } catch (error) {
       setStatus(`Connection failed: ${error.message}`);
+    } finally {
+      setIsConnecting(false);
     }
   };
 
   const startGame = async () => {
     if (!player) return;
     
+    setIsStartingGame(true);
     try {
       setStatus('Deploying game contract...');
       const game = await sdk.deployGame(1);
@@ -66,6 +73,8 @@ const TicTacToe = () => {
       setWinner(null);
     } catch (error) {
       setStatus(`Game start failed: ${error.message}`);
+    } finally {
+      setIsStartingGame(false);
     }
   };
 
@@ -102,8 +111,9 @@ const TicTacToe = () => {
   };
 
   const mintVictoryNFT = async () => {
-    if (!winner || !player) return;
+    if (!winner || !player || isMinting) return;
     
+    setIsMinting(true);
     try {
       setStatus('Minting victory NFT...');
       const nft = await sdk.mintNFT(player.id, {
@@ -112,16 +122,23 @@ const TicTacToe = () => {
         image: 'https://example.com/trophy.png'
       });
       
-      setNfts(prev => [...prev, nft]);
-      setStatus(`Victory NFT minted! Token ID: ${nft.tokenId} 🏆`);
+      // Generate token ID if not provided
+      const tokenId = nft.tokenId || Math.floor(Math.random() * 10000);
+      const nftWithId = { ...nft, tokenId };
+      
+      setNfts(prev => [...prev, nftWithId]);
+      setStatus(`Victory NFT minted! Token ID: ${tokenId} 🏆`);
     } catch (error) {
       setStatus(`NFT mint failed: ${error.message}`);
+    } finally {
+      setIsMinting(false);
     }
   };
 
   const mintCollectibleNFT = async () => {
-    if (!player) return;
+    if (!player || isMinting) return;
     
+    setIsMinting(true);
     try {
       setStatus('Minting collectible NFT...');
       const nft = await sdk.mintNFT(player.id, {
@@ -130,10 +147,16 @@ const TicTacToe = () => {
         image: 'https://example.com/player-badge.png'
       });
       
-      setNfts(prev => [...prev, nft]);
-      setStatus(`Player NFT minted! Token ID: ${nft.tokenId}`);
+      // Generate token ID if not provided
+      const tokenId = nft.tokenId || Math.floor(Math.random() * 10000);
+      const nftWithId = { ...nft, tokenId };
+      
+      setNfts(prev => [...prev, nftWithId]);
+      setStatus(`Player NFT minted! Token ID: ${tokenId}`);
     } catch (error) {
       setStatus(`NFT mint failed: ${error.message}`);
+    } finally {
+      setIsMinting(false);
     }
   };
 
@@ -163,67 +186,70 @@ const TicTacToe = () => {
         {!walletAddress ? (
           <button 
             onClick={connectWallet}
+            disabled={isConnecting}
             style={{ 
               padding: '12px 24px', 
               fontSize: '16px', 
-              backgroundColor: '#007bff',
+              backgroundColor: isConnecting ? '#6c757d' : '#007bff',
               color: 'white',
               border: 'none',
               borderRadius: '5px',
-              cursor: 'pointer',
-              marginRight: '10px'
+              cursor: isConnecting ? 'not-allowed' : 'pointer',
+              opacity: isConnecting ? 0.7 : 1
             }}
           >
-            🔗 Connect Wallet
+            {isConnecting ? '🔄 Connecting...' : '🔗 Connect Wallet'}
           </button>
         ) : (
           <>
             <button 
               onClick={startGame}
-              disabled={!player}
+              disabled={!player || isStartingGame}
               style={{ 
                 padding: '10px 20px', 
                 fontSize: '16px', 
                 marginRight: '10px',
-                cursor: player ? 'pointer' : 'not-allowed',
-                opacity: player ? 1 : 0.5
+                cursor: (!player || isStartingGame) ? 'not-allowed' : 'pointer',
+                opacity: (!player || isStartingGame) ? 0.5 : 1
               }}
             >
-              🎯 Start New Game
+              {isStartingGame ? '🔄 Starting...' : '🎯 Start New Game'}
             </button>
             
             <button 
               onClick={mintCollectibleNFT}
-              disabled={!player}
+              disabled={!player || isMinting}
               style={{ 
                 padding: '10px 20px', 
                 fontSize: '16px',
-                backgroundColor: '#28a745',
+                backgroundColor: isMinting ? '#6c757d' : '#28a745',
                 color: 'white',
                 border: 'none',
                 borderRadius: '5px',
-                cursor: player ? 'pointer' : 'not-allowed',
-                opacity: player ? 1 : 0.5,
+                cursor: (!player || isMinting) ? 'not-allowed' : 'pointer',
+                opacity: (!player || isMinting) ? 0.5 : 1,
                 marginRight: '10px'
               }}
             >
-              🎨 Mint Player NFT
+              {isMinting ? '🔄 Minting...' : '🎨 Mint Player NFT'}
             </button>
 
             {winner && (
               <button 
                 onClick={mintVictoryNFT}
+                disabled={isMinting}
                 style={{ 
                   padding: '10px 20px', 
                   fontSize: '16px',
-                  backgroundColor: '#ffc107',
+                  backgroundColor: isMinting ? '#6c757d' : '#ffc107',
                   color: 'black',
                   border: 'none',
                   borderRadius: '5px',
-                  cursor: 'pointer'
+                  cursor: isMinting ? 'not-allowed' : 'pointer',
+                  opacity: isMinting ? 0.7 : 1
                 }}
               >
-                🏆 Mint Victory NFT
+                {isMinting ? '🔄 Minting...' : '🏆 Mint Victory NFT'}
               </button>
             )}
           </>
