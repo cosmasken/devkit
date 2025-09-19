@@ -13,11 +13,17 @@
         button { padding: 10px 20px; margin: 5px; font-size: 16px; cursor: pointer; }
         .status { background: #f0f0f0; padding: 10px; border-radius: 5px; margin: 10px 0; }
         .collection { display: flex; flex-wrap: wrap; }
+        .demo-note { background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin: 20px 0; }
     </style>
 </head>
 <body>
     <h1>🎮 Simple Card Game</h1>
     <p>Collect NFT cards on the Somnia Network!</p>
+    
+    <div class="demo-note">
+        <strong>Demo Mode:</strong> This version simulates the game flow without real blockchain transactions. 
+        For full blockchain functionality, use the Node.js version or integrate with a proper build system.
+    </div>
     
     <div class="status" id="status">Click "Start Game" to begin</div>
     
@@ -34,13 +40,12 @@
         <p>No cards collected yet</p>
     </div>
 
-    <script type="module">
-        import { SomniaGameKit } from '../dist/index.js';
-        
-        let sdk = new SomniaGameKit();
+    <script>
+        // Simplified demo version for browser compatibility
         let player = null;
         let gameId = null;
         let cards = [];
+        let tokenIdCounter = 1;
         
         function updateStatus(message) {
             document.getElementById('status').textContent = message;
@@ -62,28 +67,34 @@
             `).join('');
         }
         
+        function delay(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+        
         window.startGame = async function() {
             try {
                 updateStatus('Initializing SDK...');
-                await sdk.initialize({ network: 'somnia-testnet' });
+                await delay(500);
                 
                 updateStatus('Connecting wallet...');
-                const walletAddress = await sdk.connectWallet();
+                await delay(500);
                 
                 updateStatus('Creating player...');
-                player = sdk.createPlayer({ 
+                player = { 
+                    id: 'player_' + Math.random().toString(36).substring(2, 15),
                     username: 'CardPlayer', 
                     avatar: 'https://example.com/avatar.png' 
-                });
+                };
+                await delay(500);
                 
                 updateStatus('Deploying game...');
-                const game = await sdk.deployGame(1);
-                gameId = game.id;
+                gameId = 'game_' + Math.random().toString(36).substring(2, 15);
+                await delay(1000);
                 
                 updateStatus('Starting game session...');
-                await sdk.startGame(gameId, [player.id]);
+                await delay(500);
                 
-                updateStatus(`Game ready! Wallet: ${walletAddress.slice(0,8)}...`);
+                updateStatus(`Game ready! Player: ${player.username}`);
             } catch (error) {
                 updateStatus(`Error: ${error.message}`);
             }
@@ -97,13 +108,17 @@
             
             try {
                 updateStatus(`Collecting ${cardName}...`);
-                const card = await sdk.mintNFT(player.id, {
+                await delay(1000); // Simulate blockchain transaction time
+                
+                const card = {
+                    tokenId: tokenIdCounter++,
                     name: cardName,
                     description: `A rare ${cardName} card`,
-                    image: `https://example.com/cards/${cardName.toLowerCase().replace(' ', '-')}.png`
-                });
+                    image: `https://example.com/cards/${cardName.toLowerCase().replace(' ', '-')}.png`,
+                    type: cardType
+                };
                 
-                cards.push({ ...card, type: cardType });
+                cards.push(card);
                 updateCollection();
                 updateStatus(`${cardName} collected! Token ID: ${card.tokenId}`);
             } catch (error) {
@@ -119,8 +134,7 @@
             
             try {
                 updateStatus('Loading collection...');
-                const playerCards = await sdk.getPlayerNFTs(player.id);
-                cards = playerCards;
+                await delay(300);
                 updateCollection();
                 updateStatus(`Collection loaded: ${cards.length} cards`);
             } catch (error) {
