@@ -1,0 +1,12 @@
+{
+  "contractName": "Counters",
+  "abi": [],
+  "bytecode": "60556032600b8282823980515f1a607314602657634e487b7160e01b5f525f60045260245ffd5b305f52607381538281f3fe730000000000000000000000000000000000000000301460806040525f5ffdfea26469706673582212200d5388e901d72f4844b758322151e42e0de28eddea5525e0f7136c9e96520db664736f6c634300081e0033",
+  "deployedBytecode": "",
+  "sourceFile": "@openzeppelin/contracts/utils/Counters.sol",
+  "compiler": {
+    "name": "solc",
+    "version": "0.8.30+commit.73712a01.Emscripten.clang"
+  },
+  "compiledAt": "2025-09-19T04:43:39.888Z"
+}

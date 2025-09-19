@@ -1,0 +1,247 @@
+{
+  "contractName": "GameContract",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "initialLevel",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "winner",
+          "type": "address"
+        }
+      ],
+      "name": "GameEnded",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [],
+      "name": "GameStarted",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "player",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "move",
+          "type": "string"
+        }
+      ],
+      "name": "MoveMade",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "previousOwner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "OwnershipTransferred",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "player",
+          "type": "address"
+        }
+      ],
+      "name": "PlayerJoined",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "winner",
+          "type": "address"
+        }
+      ],
+      "name": "endGame",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "gameState",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "level",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "score",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bool",
+          "name": "isActive",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getPlayers",
+      "outputs": [
+        {
+          "internalType": "address[]",
+          "name": "",
+          "type": "address[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "isPlayer",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "joinGame",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "move",
+          "type": "string"
+        }
+      ],
+      "name": "makeMove",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "owner",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "playerScores",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "renounceOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address[]",
+          "name": "players",
+          "type": "address[]"
+        }
+      ],
+      "name": "startGame",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "transferOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": "6080604052348015600e575f5ffd5b50604051610ad8380380610ad8833981016040819052602b916096565b6032336047565b6001555f6002556003805460ff1916905560ac565b5f80546001600160a01b038381166001600160a01b0319831681178455604051919092169283917f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e09190a35050565b5f6020828403121560a5575f5ffd5b5051919050565b610a1f806100b95f395ff3fe608060405234801561000f575f5ffd5b50600436106100a6575f3560e01c80638da5cb5b1161006e5780638da5cb5b146101405780639198eb7e1461015a578063d1f9c24d1461016d578063d4f77b1c1461019f578063f2fde38b146101a7578063fbd84cd6146101ba575f5ffd5b806309c95e10146100aa5780632a035b6c146100e157806362550ae1146100f6578063715018a6146101235780638b5b9ccc1461012b575b5f5ffd5b6100cc6100b836600461074d565b60056020525f908152604090205460ff1681565b60405190151581526020015b60405180910390f35b6100f46100ef36600461074d565b6101cd565b005b61011561010436600461074d565b60066020525f908152604090205481565b6040519081526020016100d8565b6100f461024a565b61013361025d565b6040516100d8919061076d565b5f546040516001600160a01b0390911681526020016100d8565b6100f46101683660046107fd565b6102c0565b60015460025460035461018292919060ff1683565b6040805193845260208401929092521515908201526060016100d8565b6100f4610396565b6100f46101b536600461074d565b61049e565b6100f46101c8366004610891565b610517565b6101d5610613565b60035460ff166102005760405162461bcd60e51b81526004016101f790610940565b60405180910390fd5b6003805460ff191690556040516001600160a01b03821681527f51b77d00d3c0b7e376e9ee146711ceb2c08e58a5dbe38055a618e52109f720c1906020015b60405180910390a150565b610252610613565b61025b5f61066c565b565b606060016003018054806020026020016040519081016040528092919081815260200182805480156102b657602002820191905f5260205f20905b81546001600160a01b03168152600190910190602001808311610298575b5050505050905090565b60035460ff166102e25760405162461bcd60e51b81526004016101f790610940565b335f9081526005602052604090205460ff166103405760405162461bcd60e51b815260206004820152601960248201527f4e6f74206120706c6179657220696e20746869732067616d650000000000000060448201526064016101f7565b335f9081526006602052604081208054600a929061035f90849061096c565b90915550506040517f08ad41b94b649de238452eae86688b4cda56a2bb56286d499fd0042b2c5ed2259061023f9033908490610991565b60035460ff166103b85760405162461bcd60e51b81526004016101f790610940565b335f9081526005602052604090205460ff161561040f5760405162461bcd60e51b8152602060048201526015602482015274141b185e595c88185b1c9958591e481a9bda5b9959605a1b60448201526064016101f7565b6004805460018082019092557f8a35acfbc15ff81a39ae7d344fd709f28e8600b4aa8c65c6b64bfe7fe36bd19b0180546001600160a01b031916339081179091555f81815260056020908152604091829020805460ff1916909417909355519081527f31e760aa525306aba638a784082a013b6a1cc0a9a1789f3f22281c0453b10b1f910160405180910390a1565b6104a6610613565b6001600160a01b03811661050b5760405162461bcd60e51b815260206004820152602660248201527f4f776e61626c653a206e6577206f776e657220697320746865207a65726f206160448201526564647265737360d01b60648201526084016101f7565b6105148161066c565b50565b61051f610613565b60035460ff161561056b5760405162461bcd60e51b815260206004820152601660248201527547616d6520697320616c72656164792061637469766560501b60448201526064016101f7565b805161057e9060049060208401906106bb565b506003805460ff191660011790555f5b81518110156105e757600160055f8484815181106105ae576105ae6109d5565b6020908102919091018101516001600160a01b031682528101919091526040015f20805460ff191691151591909117905560010161058e565b506040517f762f260439bb4be3ef6e4dc2786e2e7bd187d3d80b79057d7a424fe98563e335905f90a150565b5f546001600160a01b0316331461025b5760405162461bcd60e51b815260206004820181905260248201527f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e657260448201526064016101f7565b5f80546001600160a01b038381166001600160a01b0319831681178455604051919092169283917f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e09190a35050565b828054828255905f5260205f2090810192821561070e579160200282015b8281111561070e57825182546001600160a01b0319166001600160a01b039091161782556020909201916001909101906106d9565b5061071a92915061071e565b5090565b5b8082111561071a575f815560010161071f565b80356001600160a01b0381168114610748575f5ffd5b919050565b5f6020828403121561075d575f5ffd5b61076682610732565b9392505050565b602080825282518282018190525f918401906040840190835b818110156107ad5783516001600160a01b0316835260209384019390920191600101610786565b509095945050505050565b634e487b7160e01b5f52604160045260245ffd5b604051601f8201601f1916810167ffffffffffffffff811182821017156107f5576107f56107b8565b604052919050565b5f6020828403121561080d575f5ffd5b813567ffffffffffffffff811115610823575f5ffd5b8201601f81018413610833575f5ffd5b803567ffffffffffffffff81111561084d5761084d6107b8565b610860601f8201601f19166020016107cc565b818152856020838501011115610874575f5ffd5b816020840160208301375f91810160200191909152949350505050565b5f602082840312156108a1575f5ffd5b813567ffffffffffffffff8111156108b7575f5ffd5b8201601f810184136108c7575f5ffd5b803567ffffffffffffffff8111156108e1576108e16107b8565b8060051b6108f1602082016107cc565b9182526020818401810192908101908784111561090c575f5ffd5b6020850194505b838510156109355761092485610732565b825260209485019490910190610913565b979650505050505050565b60208082526012908201527147616d65206973206e6f742061637469766560701b604082015260600190565b8082018082111561098b57634e487b7160e01b5f52601160045260245ffd5b92915050565b60018060a01b0383168152604060208201525f82518060408401528060208501606085015e5f606082850101526060601f19601f8301168401019150509392505050565b634e487b7160e01b5f52603260045260245ffdfea26469706673582212209b08cc6ce5a313d7da8f6667ff4f017a75b45195db3a11815c24f8bb016da74764736f6c634300081e0033",
+  "deployedBytecode": "",
+  "sourceFile": "GameContract.sol",
+  "compiler": {
+    "name": "solc",
+    "version": "0.8.30+commit.73712a01.Emscripten.clang"
+  },
+  "compiledAt": "2025-09-19T04:43:39.889Z"
+}
