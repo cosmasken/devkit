@@ -7,6 +7,12 @@ describe('SomniaGameKit', () => {
     sdk = new SomniaGameKit();
   });
 
+  afterEach(async () => {
+    if (sdk && typeof sdk.cleanup === 'function') {
+      await sdk.cleanup();
+    }
+  });
+
   describe('initialize', () => {
     it('should initialize the SDK with configuration', () => {
       const config = { network: 'somnia-testnet', apiKey: 'test-key' };

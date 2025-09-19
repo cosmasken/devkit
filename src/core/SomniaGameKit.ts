@@ -108,6 +108,12 @@ export class SomniaGameKit {
    */
   private async initializeWebSocketProvider(): Promise<void> {
     try {
+      // Skip WebSocket initialization in test environment
+      if (process.env.NODE_ENV === 'test' || process.env.JEST_WORKER_ID) {
+        this.eventManager = new EventSubscriptionManager();
+        return;
+      }
+
       // Create WebSocket configuration for the specified network
       const wsConfig = createWebSocketConfig(this.config.network);
 
