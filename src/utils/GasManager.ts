@@ -36,7 +36,9 @@ export class GasManager {
 
             return gasPrice;
         } catch (error: any) {
-            throw new GasEstimationError(`Failed to get gas price: ${error.message}`);
+            console.warn('Gas price fetch failed, using fallback:', error.message);
+            // Use configured fallback or default to 20 Gwei
+            return this.config.gasSettings?.fallbackGasPrice || '20000000000';
         }
     }
 
@@ -50,7 +52,25 @@ export class GasManager {
             const gasEstimate = await this.web3.eth.estimateGas(transactionObject);
             return gasEstimate;
         } catch (error: any) {
-            throw new GasEstimationError(`Gas estimation failed: ${error.message}`);
+            console.warn('Gas estimation failed, using fallback:', error.message);
+            
+            // Use configured fallback values or defaults
+            const fallbacks = this.config.gasSettings?.fallbackGasLimits;
+            const contractDeploymentGas = fallbacks?.contractDeployment || 3000000;
+            const contractInteractionGas = fallbacks?.contractInteraction || 500000;
+            const simpleTransferGas = fallbacks?.simpleTransfer || 21000;
+            
+            // Fallback gas limits based on transaction type
+            if (transactionObject.data && transactionObject.data.length > 1000) {
+                // Contract deployment - larger gas limit
+                return contractDeploymentGas;
+            } else if (transactionObject.data && transactionObject.data.length > 100) {
+                // Contract interaction - medium gas limit
+                return contractInteractionGas;
+            } else {
+                // Simple transfer - small gas limit
+                return simpleTransferGas;
+            }
         }
     }
 

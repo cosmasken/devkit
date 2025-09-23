@@ -18,6 +18,12 @@ export interface SDKConfig {
     gasSettings?: {
         maxGasPrice?: string;
         gasMultiplier?: number;
+        fallbackGasLimits?: {
+            contractDeployment?: number;
+            contractInteraction?: number;
+            simpleTransfer?: number;
+        };
+        fallbackGasPrice?: string;
     };
     eventSettings?: {
         reconnectAttempts?: number;

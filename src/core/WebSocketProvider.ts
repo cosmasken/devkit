@@ -6,7 +6,7 @@
  */
 
 import { ethers } from 'ethers';
-import { BlockchainError } from './errors';
+import { BlockchainError, NetworkConnectionError } from './errors';
 
 export interface WebSocketConfig {
   wsUrl: string;
@@ -73,6 +73,15 @@ export class WebSocketProviderFactory {
       return this.provider;
     } catch (error: any) {
       console.error('Failed to connect WebSocket:', error);
+      
+      // Check if this is a network connectivity issue
+      if (error.code === 'ECONNREFUSED' || error.code === 'ENOTFOUND' || 
+          error.message?.includes('connect') || error.message?.includes('network')) {
+        throw new NetworkConnectionError(
+          `Network connection failed: ${error.message}`
+        );
+      }
+      
       throw new BlockchainError(
         `Failed to establish WebSocket connection: ${error.message}`,
         'WEBSOCKET_CONNECTION_ERROR',

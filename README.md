@@ -18,7 +18,7 @@ This SDK provides tools for developing blockchain-based games on the Somnia Netw
 - **Network Support**: Configurable for testnet, mainnet, or local development
 - **Error Handling**: Comprehensive error handling with custom error types
 - **Gas Management**: Automatic gas estimation and price fetching
-- **WebSocket Events**: Real-time event listening via WebSocket connections
+- **WebSocket Events**: Real-time event listening via WebSocket connections with automatic reconnection
 - **Utility Functions**: Generate IDs, validate entities, and more
 
 ## Installation
@@ -114,8 +114,8 @@ await sdk.endGame(session.id, finalState);
 - `removeEventListener(gameId, eventName, callback)`: Removes an event listener
 - `listenForBlockchainEvents(contractAddress, eventName, callback)`: Listens for blockchain events
 - `stopListeningForBlockchainEvents(contractAddress, eventName)`: Stops listening for blockchain events
-- `listenForWebSocketEvents(contractAddress, eventName, callback, filter)`: Listens for events via WebSocket
-- `stopListeningForWebSocketEvents(listenerId)`: Stops listening for WebSocket events
+- `listenForWebSocketEvents(contractAddress, eventName, callback, filter)`: Listens for events via WebSocket with optional filtering
+- `stopListeningForWebSocketEvents(listenerId)`: Stops listening for WebSocket events and cleans up the subscription
 
 ### Utility Functions
 
@@ -133,6 +133,7 @@ The SDK provides custom error types for better error handling:
 - `WalletConnectionError`: Wallet connection errors
 - `ContractError`: Smart contract interaction errors
 - `GasEstimationError`: Gas estimation errors
+- `NetworkConnectionError`: Network connectivity errors
 
 ## Development
 
@@ -201,9 +202,17 @@ await sdk.mintNFT(playerId, metadata, {
 
 ## WebSocket Event Listening
 
-The SDK supports real-time event listening via WebSocket connections to the Somnia network:
+The SDK supports real-time event listening via WebSocket connections to the Somnia network. This allows your application to receive immediate notifications when blockchain events occur, such as game moves, NFT transfers, or game state changes.
+
+### Basic Usage
 
 ```javascript
+// Initialize the SDK with WebSocket support
+const sdk = new SomniaGameKit();
+await sdk.initialize({ 
+  network: 'somnia-testnet'
+});
+
 // Listen for specific contract events in real-time
 const listenerId = await sdk.listenForWebSocketEvents(
   contractAddress,
@@ -217,9 +226,124 @@ const listenerId = await sdk.listenForWebSocketEvents(
 await sdk.stopListeningForWebSocketEvents(listenerId);
 ```
 
-Supported WebSocket endpoints:
+### Listening for Game Events
+
+You can listen for specific game events like moves, player joins, or game endings:
+
+```javascript
+// Listen for MoveMade events
+const moveListenerId = await sdk.listenForWebSocketEvents(
+  gameContractAddress,
+  'MoveMade',
+  (event) => {
+    console.log(`Player ${event.player} made move: ${event.move}`);
+    // Update UI in real-time
+  }
+);
+
+// Listen for GameEnded events
+const endListenerId = await sdk.listenForWebSocketEvents(
+  gameContractAddress,
+  'GameEnded',
+  (event) => {
+    console.log(`Game ended! Winner: ${event.winner}`);
+    // Show winner announcement
+  }
+);
+```
+
+### Listening for NFT Events
+
+Monitor NFT transfers and other NFT-related events:
+
+```javascript
+// Listen for NFT Transfer events
+const transferListenerId = await sdk.listenForWebSocketEvents(
+  nftContractAddress,
+  'Transfer',
+  (event) => {
+    console.log(`NFT ${event.tokenId} transferred from ${event.from} to ${event.to}`);
+    // Update player inventories in real-time
+  }
+);
+```
+
+### Using Event Filters
+
+You can filter events based on specific criteria:
+
+```javascript
+// Listen only for moves by a specific player
+const filteredListenerId = await sdk.listenForWebSocketEvents(
+  gameContractAddress,
+  'MoveMade',
+  (event) => {
+    console.log(`Move by ${event.player}: ${event.move}`);
+  },
+  { player: specificPlayerAddress } // Filter object
+);
+```
+
+### Managing Multiple Listeners
+
+You can set up multiple listeners and manage them individually:
+
+```javascript
+const listeners = [];
+
+// Set up multiple listeners
+const listener1 = await sdk.listenForWebSocketEvents(
+  gameContractAddress,
+  'GameStarted',
+  (event) => console.log('Game started:', event)
+);
+listeners.push(listener1);
+
+const listener2 = await sdk.listenForWebSocketEvents(
+  gameContractAddress,
+  'MoveMade',
+  (event) => console.log('Move made:', event)
+);
+listeners.push(listener2);
+
+// Clean up all listeners when done
+for (const listenerId of listeners) {
+  await sdk.stopListeningForWebSocketEvents(listenerId);
+}
+```
+
+### Error Handling
+
+WebSocket connections can encounter errors. The SDK handles reconnection automatically, but you can also listen for connection status changes:
+
+```javascript
+// Check connection status
+if (sdk.isWebSocketConnected()) {
+  console.log('WebSocket is connected');
+} else {
+  console.log('WebSocket is not connected');
+}
+
+// Get detailed network status
+try {
+  const status = await sdk.getNetworkStatus();
+  console.log('Network status:', status);
+} catch (error) {
+  console.error('Failed to get network status:', error.message);
+}
+```
+
+### Supported WebSocket Endpoints
+
 - **Testnet**: `wss://dream-rpc.somnia.network/ws`
 - **Mainnet**: `wss://api.infra.mainnet.somnia.network/ws`
+
+### Best Practices
+
+1. **Always clean up listeners**: Use `stopListeningForWebSocketEvents` when components unmount or when you no longer need to listen for events.
+2. **Handle reconnection**: The SDK automatically handles reconnections, but your application should be prepared for temporary disconnections.
+3. **Use specific event names**: Listen for specific events rather than broad categories to improve performance.
+4. **Implement error handling**: Always handle potential errors when setting up or tearing down event listeners.
 
 ## License
 

@@ -29,13 +29,7 @@ export type {
   NFTEventCallbacks
 } from './events/EventSubscriptionManager';
 
-// Error classes
-export {
-  BlockchainError,
-  WalletConnectionError,
-  ContractError,
-  GasEstimationError
-} from './core/errors';
+// Error classes\nexport {\n  BlockchainError,\n  WalletConnectionError,\n  ContractError,\n  GasEstimationError,\n  NetworkConnectionError\n} from './core/errors';
 
 // Network configurations
 export { NETWORK_CONFIGS } from './core/config';

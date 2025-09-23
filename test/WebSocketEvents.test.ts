@@ -12,8 +12,8 @@ describe('SomniaGameKit WebSocket Events', () => {
       // Mock initialization
       await sdk.initialize({ network: 'somnia-testnet' });
       
-      // Create a mock game
-      const game = await sdk.deployGame(1);
+      // Create a mock game using the legacy API
+      const game = sdk.deployGame('bytecode', {}, { level: 1 });
       
       // Test WebSocket event listener setup
       const listenerCallback = jest.fn();
@@ -32,8 +32,8 @@ describe('SomniaGameKit WebSocket Events', () => {
       // Mock initialization
       await sdk.initialize({ network: 'somnia-testnet' });
       
-      // Create a mock game
-      const game = await sdk.deployGame(1);
+      // Create a mock game using the legacy API
+      const game = sdk.deployGame('bytecode', {}, { level: 1 });
       
       // Set up a WebSocket event listener
       const listenerCallback = jest.fn();

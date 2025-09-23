@@ -21,7 +21,7 @@ describe('Contract Deployment', () => {
             sdk['config'] = { network: 'local' };
             sdk['web3'] = {} as any; // Mock web3 instance
 
-            await expect(sdk.deployGame(1)).rejects.toThrow('Wallet must be connected before deploying contracts');
+            await expect(sdk.deployGame(1)).rejects.toThrow('Wallet not connected. Please connect wallet first.');
         });
 
         it('should have deployGame method available', () => {
@@ -35,7 +35,7 @@ describe('Contract Deployment', () => {
             sdk['config'] = { network: 'local' };
             sdk['web3'] = {} as any; // Mock web3 instance
 
-            await expect(sdk.deployNFTContract()).rejects.toThrow('Wallet must be connected before deploying contracts');
+            await expect(sdk.deployNFTContract()).rejects.toThrow('Wallet not connected. Please connect wallet first.');
         });
 
         it('should have deployNFTContract method available', () => {

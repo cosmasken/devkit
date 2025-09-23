@@ -1,5 +1,8 @@
 const { SomniaGameKit } = require('../dist/index.js');
 
+// Set environment to test to skip WebSocket initialization
+process.env.NODE_ENV = 'test';
+
 class SimpleCardGame {
   constructor() {
     this.sdk = new SomniaGameKit();

@@ -44,7 +44,7 @@ describe('SomniaGameKit NFT Operations', () => {
                         'A test NFT',
                         'https://example.com/image.png'
                     )
-                ).rejects.toThrow('Wallet must be connected to mint NFTs');
+                ).rejects.toThrow('Wallet not connected. Please connect wallet first.');
             } finally {
                 await sdkNoWallet.cleanup();
             }
@@ -133,7 +133,7 @@ describe('SomniaGameKit NFT Operations', () => {
                         '0x0987654321098765432109876543210987654321',
                         1
                     )
-                ).rejects.toThrow('Wallet must be connected to transfer NFTs');
+                ).rejects.toThrow('Wallet not connected. Please connect wallet first.');
             } finally {
                 await sdkNoWallet.cleanup();
             }

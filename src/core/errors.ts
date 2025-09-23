@@ -29,3 +29,10 @@ export class GasEstimationError extends Error {
         this.name = 'GasEstimationError';
     }
 }
+
+export class NetworkConnectionError extends Error {
+    constructor(message: string) {
+        super(message);
+        this.name = 'NetworkConnectionError';
+    }
+}

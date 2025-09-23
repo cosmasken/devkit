@@ -53,7 +53,18 @@ describe('SomniaGameKit - Contract Event Subscription', () => {
         await sdk.initialize({
             network: 'somnia-testnet'
         });
-        mockProvider = sdk.getEthersProvider();
+        
+        // In test environment, we need to manually set up the ethers provider
+        // since WebSocket initialization is skipped
+        mockProvider = {
+            _waitUntilReady: jest.fn().mockResolvedValue(undefined),
+            on: jest.fn(),
+            off: jest.fn(),
+            getBlockNumber: jest.fn().mockResolvedValue(12345)
+        };
+        
+        // Set the ethers provider in the event manager
+        (sdk as any).eventManager.setEthersProvider(mockProvider);
     });
 
     afterEach(async () => {
